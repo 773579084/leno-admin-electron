@@ -1,0 +1,30 @@
+@import '@/assets/style';
+
+.site-layout-background {
+  background: #fff;
+
+  :global {
+
+    .ant-layout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px!important;
+      line-height: 56px;
+
+      .anticon {
+        margin: 0 8px;
+        color: white;
+      }
+
+      .ant-avatar {
+        margin-right: 16px;
+        cursor: pointer;
+      }
+    }
+  }
+}
+
+.header-left,.header-right {
+  @include dis-center;
+}
