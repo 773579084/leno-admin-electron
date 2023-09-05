@@ -13,11 +13,11 @@ const root = document.getElementById('root')
 if (root) {
   /**此处使用 react18之前的渲染方式，是因为路由缓存组件 react-activation 如果使用 createRoot 渲染会造成黑色频闪问题 */
   ReactDOM.render(
-    <BrowserRouter>
+    <HashRouter>
       <ConfigProvider locale={zhCN}>
         <App />
       </ConfigProvider>
-    </BrowserRouter>,
+    </HashRouter>,
     root,
   )
 }
