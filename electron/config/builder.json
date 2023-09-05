@@ -1,7 +1,7 @@
 {
-  "productName": "ee",
-  "appId": "com.electron.ee",
-  "copyright": "© 2023 哆啦好梦 Technology Co., Ltd.",
+  "productName": "leno-admin-electron-12312141",
+  "appId": "com.leno-admin-electron.ee",
+  "copyright": "© 2023 我隔这敲代码呢 Technology Co., Ltd.",
   "directories": {
     "output": "out"
   },

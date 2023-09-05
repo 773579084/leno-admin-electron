@@ -3,13 +3,6 @@ $boderColor:#dfe6ec;
 
 .home {
 
-  .image {
-    height: 400px;
-    width: 100%;
-    background: url('@/assets/images/pay.jpg') no-repeat;
-    background-size: 100% 100%;
-  }
-
   :global {
 
     .ant-card-bordered {

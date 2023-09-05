@@ -41,8 +41,8 @@ module.exports = (appInfo) => {
    */
   config.windowsOption = {
     title: 'leno-admin',
-    width: 980,
-    height: 650,
+    width: 1080,
+    height: 780,
     minWidth: 800,
     minHeight: 650,
     webPreferences: {
