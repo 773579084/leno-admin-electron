@@ -128,7 +128,7 @@ module.exports = (appInfo) => {
    * 主进程
    */
   config.mainServer = {
-    protocol: 'file://',
+    protocol: 'http://',
     indexPath: '/public/dist/index.html',
     host: 'localhost',
     port: 7072,
