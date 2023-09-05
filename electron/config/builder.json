@@ -1,5 +1,5 @@
 {
-  "productName": "leno-admin-electron-12312141",
+  "productName": "leno-admin-electron",
   "appId": "com.leno-admin-electron.ee",
   "copyright": "© 2023 我隔这敲代码呢 Technology Co., Ltd.",
   "directories": {
@@ -26,7 +26,7 @@
     "installerHeaderIcon": "build/icons/icon.ico",
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "EE框架"
+    "shortcutName": "leno-admin-electron"
   },
   "mac": {
     "icon": "build/icons/icon.icns",
