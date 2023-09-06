@@ -1,20 +1,21 @@
 <p align="center">
 	<img alt="logo" src="https://gitee.com/zhao-wenchao110/leno_-admin/raw/master/remdme-show-imgs/logo.png">
 </p>
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">🎉🎉🎉Leno Admin Electron🎉🎉🎉</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">🎉🎉Leno Admin Electron🎉🎉</h1>
 <h4 align="center">基于React、electron、Ts的客户端后台管理系统</h4>
 
 ## 📋平台简介
 
-Leno Admin Electron是一套全部开源的快速开发客户端平台（支持win、mac、linux等系统），功能强大、操作简单，毫无保留的给个人及企业免费使用。
+🥗 Leno Admin Electron是一套全部开源的快速开发客户端平台（支持win、mac、linux等系统），功能强大、操作简单，毫无保留的给个人及企业免费使用。
 
-整体采用React Hooks、antd、ts、electron-egg(https://gitee.com/dromara/electron-egg/tree/master/)。
+😘 项目中使用和借鉴了[ruoyi](http://ruoyi.vip/)框架、[electron-egg](https://gitee.com/dromara/electron-egg/tree/master/)
 
-本项目中只含有前端代码，如果需要后端代码可以移步到`leno-admin`；
 
-leno-admin（gitee）：https://gitee.com/zhao-wenchao110/leno_-admin
+✨ 本项目中只含有前端代码，如果需要后端代码可以移步到`leno-admin`；
 
-leno-admin（github）：https://github.com/773579084/Leno_Admin
+🍰 leno-admin（gitee）：https://gitee.com/zhao-wenchao110/leno_-admin
+
+🍨 leno-admin（github）：https://github.com/773579084/Leno_Admin
 
 ## 📦内置功能
 
