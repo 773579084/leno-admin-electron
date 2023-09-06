@@ -1,10 +1,10 @@
 <p align="center">
 	<img alt="logo" src="https://gitee.com/zhao-wenchao110/leno_-admin/raw/master/remdme-show-imgs/logo.png">
 </p>
-<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">Leno Admin Electron</h1>
+<h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">🎉🎉🎉Leno Admin Electron🎉🎉🎉</h1>
 <h4 align="center">基于React、electron、Ts的客户端后台管理系统</h4>
 
-## 平台简介
+## 📋平台简介
 
 Leno Admin Electron是一套全部开源的快速开发客户端平台（支持win、mac、linux等系统），功能强大、操作简单，毫无保留的给个人及企业免费使用。
 
@@ -16,7 +16,7 @@ leno-admin（gitee）：https://gitee.com/zhao-wenchao110/leno_-admin
 
 leno-admin（github）：https://github.com/773579084/Leno_Admin
 
-## 内置功能
+## 📦内置功能
 
 1.  用户管理：用户是系统操作者，该功能主要完成系统用户配置。
 2.  部门管理：配置系统组织机构（公司、部门、小组），树结构展现支持数据权限。
@@ -34,7 +34,7 @@ leno-admin（github）：https://github.com/773579084/Leno_Admin
 15. 服务监控：监视当前系统CPU、内存、磁盘、堆栈等相关信息。
 16. 缓存监控：对系统的缓存信息查询，命令统计等。
 
-## web端的在线体验（功能和客户端一致）
+## 📚web端的在线体验（功能和客户端一致）
 
 - admin/123456  
 
@@ -42,7 +42,7 @@ leno-admin（github）：https://github.com/773579084/Leno_Admin
 
 文档地址：http://zhao-wenchao110.gitee.io/lenoadmin-docs
 
-## 演示图
+## 🐶演示图
 
 <table>
     <tr>
@@ -64,6 +64,6 @@ leno-admin（github）：https://github.com/773579084/Leno_Admin
 </table>
 
 
-## Leno Admin前后端分离系统交流群
+## 💬Leno Admin前后端分离系统交流群
 
 QQ群：913365274。
