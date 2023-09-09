@@ -34,7 +34,9 @@ const ContentCom = () => {
       style={layoutSet.fixedHeader ? { overflow: 'auto' } : {}}
       key={pathname}
     >
-      <Outlet />
+      <div key={pathname} className={classes['router-animation']}>
+        <Outlet />
+      </div>
 
       {/* 内容展示区的laoding */}
       <ContentLoading />
