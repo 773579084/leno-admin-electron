@@ -1,202 +1,178 @@
-import React, { useState, useEffect, useRef } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  Radio,
-  message,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  BellOutlined,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/notice'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { InoticeType } from '@/type/modules/system/notice'
-import ColorBtn from '@/components/ColorBtn'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import TextEditor from '@/components/TextEditor'
-import { IDomEditor } from '@wangeditor/editor'
-import { commonDelImgAPI } from '@/api/modules/common'
-import { hasPermi } from '@/utils/auth'
-import useStore from '@/store'
-import { pageDelJump } from '@/utils'
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Form, Input, Select, Col, Row, Tooltip, Table, Pagination, Modal, Radio, message } from 'antd';
+import { SyncOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, BellOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/notice';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { InoticeType } from '@/type/modules/system/notice';
+import ColorBtn from '@/components/ColorBtn';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import TextEditor from '@/components/TextEditor';
+import { IDomEditor } from '@wangeditor/editor';
+import { commonDelImgAPI } from '@/api/modules/common';
+import { hasPermi } from '@/utils/auth';
+import useStore from '@/store';
+import { pageDelJump } from '@/utils';
 
 const SysNotice: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
   const {
     useSocketStore: { socket },
-  } = useStore()
+  } = useStore();
 
   // 分页
-  const [queryParams, setQueryParams] = useState<InoticeType>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<InoticeType>({ pageNum: 1, pageSize: 10 });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as InoticeType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as InoticeType[] });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 非单个禁用
-  const [single, setSingle] = useState(true)
+  const [single, setSingle] = useState(true);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   //  table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 当前编辑的id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
   // editor
-  const editorRef = useRef()
-  const [editorHtml, setEditorHtml] = useState<string>('')
-  const [imgs, setImgs] = useState<string>('')
+  const editorRef = useRef();
+  const [editorHtml, setEditorHtml] = useState<string>('');
+  const [imgs, setImgs] = useState<string>('');
 
-  const [dictNoticeType, setDictNoticeType] = useState<IdictType[]>([])
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
+  const [dictNoticeType, setDictNoticeType] = useState<IdictType[]>([]);
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const sys_notice_type = await getDictsApi('sys_notice_type')
-        setDictNoticeType(sys_notice_type.data.result)
-        const sys_notice_status = await getDictsApi('sys_notice_status')
-        setDictStatus(sys_notice_status.data.result)
+        const sys_notice_type = await getDictsApi('sys_notice_type');
+        setDictNoticeType(sys_notice_type.data.result);
+        const sys_notice_status = await getDictsApi('sys_notice_status');
+        setDictStatus(sys_notice_status.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
-      setDataList({ ...data.result })
-      setLoading(false)
+      const { data } = await getListAPI(queryParams);
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let form = queryForm.getFieldsValue()
+    const form = queryForm.getFieldsValue();
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   // 重置
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // 添加编辑 确认
   const addEditFn = async () => {
     const { editor, html, uploadedImg } = editorRef.current as unknown as {
-      editor: IDomEditor
-      html: string
-      uploadedImg: string[]
-    }
+      editor: IDomEditor;
+      html: string;
+      uploadedImg: string[];
+    };
     // 1 获取富文本保存的 图片
     const saveImgs = editor.getElemsByType('image') as unknown as {
-      src: string
-    }[]
+      src: string;
+    }[];
     // 2 用保存全部图片的 uploadedImg 对比 saveImgs 得出需要删除的img 调用后端接口删除图片
-    const delImgs: string[] = []
-    const uploadImgs: string[] = []
+    const delImgs: string[] = [];
+    const uploadImgs: string[] = [];
 
     uploadedImg.forEach((item) => {
-      if (
-        !saveImgs.find((value) => value.src.split('/')[value.src.split('/').length - 1] === item)
-      ) {
-        delImgs.push(item)
+      if (!saveImgs.find((value) => value.src.split('/')[value.src.split('/').length - 1] === item)) {
+        delImgs.push(item);
       } else {
-        uploadImgs.push(item)
+        uploadImgs.push(item);
       }
-    })
-    setImgs(JSON.stringify(uploadImgs))
+    });
+    setImgs(JSON.stringify(uploadImgs));
 
     try {
-      const { data } = await commonDelImgAPI(delImgs)
-      message.success(data.message)
+      const { data } = await commonDelImgAPI(delImgs);
+      message.success(data.message);
       // 3 将 html 存储到 form 表单
-      addEditForm.setFieldValue('noticeContent', html)
-      addEditForm.submit()
+      addEditForm.setFieldValue('noticeContent', html);
+      addEditForm.submit();
     } catch (error) {}
-  }
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: InoticeType[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       if (!selectedRowKeys.length || selectedRowKeys.length > 1) {
-        setSingle(true)
+        setSingle(true);
       } else {
-        setSingle(false)
+        setSingle(false);
       }
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setSelectKeys(selectedRowKeys)
-      setRowKeys(selectedRowKeys.join(','))
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setSelectKeys(selectedRowKeys);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
   // 获取详情
   const handleEditForm = async (id: number) => {
     try {
-      const { data } = await getDetailAPI(id)
-      setEditorHtml(data.result.noticeContent as string)
-      setImgs(data.result.imgs as string)
-      addEditForm.setFieldsValue(data.result as unknown as InoticeType)
-      setCurrentId(id)
-      setIsModalOpen(true)
-      setIsAdd(false)
+      const { data } = await getDetailAPI(id);
+      setEditorHtml(data.result.noticeContent as string);
+      setImgs(data.result.imgs as string);
+      addEditForm.setFieldsValue(data.result as unknown as InoticeType);
+      setCurrentId(id);
+      setIsModalOpen(true);
+      setIsAdd(false);
     } catch (error) {}
-  }
+  };
 
   // 表单提交
   const handleFormFinish = async (values: InoticeType) => {
     try {
       if (isAdd) {
-        await addAPI({ ...values, imgs: imgs })
+        await addAPI({ ...values, imgs });
       } else {
-        await putAPI({ ...values, imgs: imgs, noticeId: currentId })
+        await putAPI({ ...values, imgs, noticeId: currentId });
       }
-      addEditForm.resetFields()
-      getList()
-      setIsModalOpen(false)
+      addEditForm.resetFields();
+      getList();
+      setIsModalOpen(false);
     } catch (error) {}
-  }
+  };
 
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -204,35 +180,33 @@ const SysNotice: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 发送通知
   const sendNotice = (res: InoticeType) => {
     if (res.status === '0') {
-      const noticeData = dictNoticeType.find((item) => {
-        return item.dictValue === res.noticeType
-      })
+      const noticeData = dictNoticeType.find((item) => item.dictValue === res.noticeType);
       try {
-        socket.emit('postNotice', res)
-        message.success(`发送${noticeData?.dictLabel}成功`)
+        socket.emit('postNotice', res);
+        message.success(`发送${noticeData?.dictLabel}成功`);
       } catch (error) {
-        message.success(`发送${noticeData?.dictLabel}失败，请联系管理员`)
+        message.success(`发送${noticeData?.dictLabel}失败，请联系管理员`);
       }
     } else {
-      message.success(`请更改公告状态再通知`)
+      message.success(`请更改公告状态再通知`);
     }
-  }
+  };
 
   // table
-  let columns = [
+  const columns = [
     {
       title: '编码',
       dataIndex: 'index',
@@ -245,9 +219,7 @@ const SysNotice: React.FC = () => {
       dataIndex: 'noticeTitle',
       key: 'noticeTitle',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -288,40 +260,22 @@ const SysNotice: React.FC = () => {
       width: 240,
       render: (_: any, record: InoticeType) => (
         <div>
-          <Button
-            hidden={hasPermi('system:notice:notice')}
-            onClick={() => sendNotice(record)}
-            size="small"
-            icon={<BellOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:notice:notice')} onClick={() => sendNotice(record)} size="small" icon={<BellOutlined />} type="link">
             通知
           </Button>
-          <Button
-            hidden={hasPermi('system:notice:edit')}
-            onClick={() => handleEditForm(record.noticeId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:notice:edit')} onClick={() => handleEditForm(record.noticeId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('system:notice:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(String(record.noticeId))}
-          >
+          <Button hidden={hasPermi('system:notice:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(String(record.noticeId))}>
             删除
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<InoticeType>
+  ] as ColumnsType<InoticeType>;
 
   // table 数据源
-  const tableData = dataList.rows
+  const tableData = dataList.rows;
 
   return (
     <div className="app-container">
@@ -329,20 +283,10 @@ const SysNotice: React.FC = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="公告标题" name="noticeTitle">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入公告标题"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入公告标题" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="操作人员" name="createBy">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入操作人员"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入操作人员" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="类型" name="noticeType">
               <Select
@@ -375,33 +319,21 @@ const SysNotice: React.FC = () => {
                     hidden={hasPermi('system:notice:add')}
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setEditorHtml('')
-                      setIsAdd(true)
-                      setIsModalOpen(true)
+                      setEditorHtml('');
+                      setIsAdd(true);
+                      setIsModalOpen(true);
                     }}
                   >
                     新增
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:notice:edit')}
-                    disabled={single}
-                    color="success"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEditForm(Number(rowKeys))}
-                  >
+                  <ColorBtn hidden={hasPermi('system:notice:edit')} disabled={single} color="success" icon={<EditOutlined />} onClick={() => handleEditForm(Number(rowKeys))}>
                     修改
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:notice:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('system:notice:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
@@ -415,7 +347,7 @@ const SysNotice: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -426,8 +358,8 @@ const SysNotice: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
-                        setSelectKeys([])
+                        searchQueryFn();
+                        setSelectKeys([]);
                       }}
                     />
                   </Tooltip>
@@ -436,24 +368,8 @@ const SysNotice: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="noticeId"
-              size="middle"
-              loading={loading}
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="noticeId" size="middle" loading={loading} rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           {/* 添加 编辑 */}
@@ -462,38 +378,20 @@ const SysNotice: React.FC = () => {
             open={isModalOpen}
             onOk={addEditFn}
             onCancel={() => {
-              setIsModalOpen(false)
-              addEditForm.resetFields()
+              setIsModalOpen(false);
+              addEditForm.resetFields();
             }}
             width={900}
           >
-            <Form
-              form={addEditForm}
-              labelCol={{ span: 3 }}
-              onFinish={handleFormFinish}
-              initialValues={{
-                status: '0',
-              }}
-            >
+            <Form form={addEditForm} labelCol={{ span: 3 }} onFinish={handleFormFinish} initialValues={{ status: '0' }}>
               <Row gutter={24}>
                 <Col span={12}>
-                  <Form.Item
-                    label="公告标题"
-                    name="noticeTitle"
-                    hidden={false}
-                    rules={[{ required: true, message: '请输入公告标题!' }]}
-                    labelCol={{ span: 6 }}
-                  >
+                  <Form.Item label="公告标题" name="noticeTitle" hidden={false} rules={[{ required: true, message: '请输入公告标题!' }]} labelCol={{ span: 6 }}>
                     <Input placeholder="请输入公告标题" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item
-                    label="公告类型"
-                    name="noticeType"
-                    rules={[{ required: true, message: '请选择公告类型!' }]}
-                    labelCol={{ span: 6 }}
-                  >
+                  <Form.Item label="公告类型" name="noticeType" rules={[{ required: true, message: '请选择公告类型!' }]} labelCol={{ span: 6 }}>
                     <Select
                       placeholder="公告类型"
                       allowClear
@@ -521,7 +419,7 @@ const SysNotice: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default SysNotice
+export default SysNotice;

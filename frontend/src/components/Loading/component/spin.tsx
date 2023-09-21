@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
-import classes from './spin.module.scss'
-import { ILoadingGloBalPropsType } from '@/type'
+import React, { useState } from 'react';
+import { ILoadingGloBalPropsType } from '@/type';
+import classes from './spin.module.scss';
 
 const Spin: React.FC<ILoadingGloBalPropsType> = ({ className, delay, tip }) => {
-  const [isShow, setIsShow] = useState(false)
+  const [isShow, setIsShow] = useState(false);
   setTimeout(() => {
-    setIsShow(true)
-  }, delay)
+    setIsShow(true);
+  }, delay);
 
   return isShow ? (
-    <div className={classes['loading-global'] + ` ${className}`}>
+    <div className={`${classes['loading-global']} ${className}`}>
       <div className={classes.ring1}>
         <div className={classes.ring2}></div>
         <div className={classes.ring3}></div>
@@ -17,6 +17,6 @@ const Spin: React.FC<ILoadingGloBalPropsType> = ({ className, delay, tip }) => {
       </div>
       {tip ? <div className={classes['laoding-font']}>{tip}</div> : null}
     </div>
-  ) : null
-}
-export default Spin
+  ) : null;
+};
+export default Spin;

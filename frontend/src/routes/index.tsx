@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
-import { Navigate, useRoutes } from 'react-router-dom'
-import { HOME_URL } from '@/config/config'
-import useStore from '@/store'
-import { observer } from 'mobx-react-lite'
-import { RouteType } from '@/type/modules/system/menu'
-import { toJS } from 'mobx'
+import { useEffect, useState } from 'react';
+import { Navigate, useRoutes } from 'react-router-dom';
+import { HOME_URL } from '@/config/config';
+import useStore from '@/store';
+import { observer } from 'mobx-react-lite';
+import { RouteType } from '@/type/modules/system/menu';
+import { toJS } from 'mobx';
 
 /* 主干路由页面 */
-import Login from '@/views/login'
-import Page404 from '@/views/errMessage/404'
-import Page500 from '@/views/errMessage/500'
-import Layout from '@/Layout'
+import Login from '@/views/login';
+import Page404 from '@/views/errMessage/404';
+import Page500 from '@/views/errMessage/500';
+import Layout from '@/Layout';
 
 /**
  * 路由配置项
@@ -38,40 +38,34 @@ export const rootRouter = [
   {
     path: '/login',
     element: <Login />,
-    meta: {
-      title: '登录页',
-    },
+    meta: { title: '登录页' },
   },
   {
     path: '/404',
     element: <Page404 />,
-    meta: {
-      title: '404页面',
-    },
+    meta: { title: '404页面' },
   },
   {
     path: '/500',
     element: <Page500 />,
-    meta: {
-      title: '500页面',
-    },
+    meta: { title: '500页面' },
   },
   {
     path: '/',
     element: <Navigate to={HOME_URL} />,
   },
-]
+];
 
 export const Router = observer(() => {
-  const [route, setRoute] = useState(rootRouter)
+  const [route, setRoute] = useState(rootRouter);
   const {
     useRoutersStore: { dynamicRouters },
-  } = useStore()
+  } = useStore();
 
   useEffect(() => {
-    rootRouter[0].children = toJS(dynamicRouters)
-    setRoute([...rootRouter])
-  }, [dynamicRouters])
+    rootRouter[0].children = toJS(dynamicRouters);
+    setRoute([...rootRouter]);
+  }, [dynamicRouters]);
 
-  return useRoutes(route)
-})
+  return useRoutes(route);
+});

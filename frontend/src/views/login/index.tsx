@@ -1,62 +1,62 @@
-import { useEffect, useState } from 'react'
-import classes from './index.module.scss'
-import LoginForm from './component/LoginForm'
-import RegisterForm from './component/RegisterForm'
-import SvgIcon from '@/components/SvgIcon'
-import { IcaptchaImageType, ILogin } from '@/type'
-import { captchaImageAPI } from '@/api/modules/user'
+import { useEffect, useState } from 'react';
+import SvgIcon from '@/components/SvgIcon';
+import { IcaptchaImageType, ILogin } from '@/type';
+import { captchaImageAPI } from '@/api/modules/user';
+import classes from './index.module.scss';
+import LoginForm from './component/LoginForm';
+import RegisterForm from './component/RegisterForm';
 
 const Login = () => {
   // 控制 login 与 register 切换
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(true);
   const [login, setLogin] = useState({
     userName: 'admin',
     password: '123456',
     code: '',
     uuid: '',
-  } as ILogin)
+  } as ILogin);
   const [registerList, setRegisterList] = useState({
     userName: '',
     password: '',
     password2: '',
     code: '',
     uuid: '',
-  } as ILogin)
+  } as ILogin);
   const [svgCode, setSvgCode] = useState<IcaptchaImageType>({
     img: '',
     uuid: '',
-  })
-
-  useEffect(() => {
-    getCaptchaImage()
-  }, [])
+  });
 
   // 验证图片
   const getCaptchaImage = async () => {
     try {
       const {
         data: { result },
-      } = await captchaImageAPI()
-      setSvgCode(result)
+      } = await captchaImageAPI();
+      setSvgCode(result);
     } catch (error) {}
-  }
+  };
+
+  useEffect(() => {
+    getCaptchaImage();
+  }, []);
 
   const changeIsLogin = (data: ILogin, isStatus: string) => {
     switch (isStatus) {
       case 'reg':
-        setRegisterList({ ...data })
-        break
+        setRegisterList({ ...data });
+        break;
       case 'regErr':
-        setRegisterList({ ...data })
-        return
+        setRegisterList({ ...data });
+        return;
       case 'regOk':
-        setLogin({ ...data })
-        return
+        setLogin({ ...data });
+        return;
       default:
-        break
+        break;
     }
-    setIsLogin(!isLogin)
-  }
+    setIsLogin(!isLogin);
+  };
 
   return (
     <div className={classes['login-container']}>
@@ -69,29 +69,16 @@ const Login = () => {
         {/* login && Register */}
         <div className={classes['login-box']}>
           {isLogin ? (
-            <LoginForm
-              toggleLogin={isLogin}
-              changeIsLogin={changeIsLogin}
-              loginData={login}
-              svgCode={svgCode}
-              getCaptchaImage={getCaptchaImage}
-            />
+            <LoginForm toggleLogin={isLogin} changeIsLogin={changeIsLogin} loginData={login} svgCode={svgCode} getCaptchaImage={getCaptchaImage} />
           ) : (
-            <RegisterForm
-              changeIsLogin={changeIsLogin}
-              registerList={registerList}
-              svgCode={svgCode}
-              getCaptchaImage={getCaptchaImage}
-            />
+            <RegisterForm changeIsLogin={changeIsLogin} registerList={registerList} svgCode={svgCode} getCaptchaImage={getCaptchaImage} />
           )}
         </div>
 
-        <div className={classes['copyright']}>
-          Copyright © 2023-current zhaowenchao.top All Rights Reserved
-        </div>
+        <div className={classes.copyright}>Copyright © 2023-current zhaowenchao.top All Rights Reserved</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

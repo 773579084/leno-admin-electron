@@ -1,152 +1,124 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  message,
-  Modal,
-  Radio,
-  InputNumber,
-  TreeSelect,
-  Popover,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SwapOutlined,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getListAPI, addAPI, delAPI, getDetailAPI, putAPI } from '@/api/modules/system/menu'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, Select, Col, Row, Tooltip, Table, message, Modal, Radio, InputNumber, TreeSelect, Popover } from 'antd';
+import { SyncOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, SwapOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, addAPI, delAPI, getDetailAPI, putAPI } from '@/api/modules/system/menu';
 // components
-import ColorBtn from '@/components/ColorBtn'
-import DictTag from '@/components/DictTag'
-import IconSelect from '@/components/IconSelect'
-import { menusType, ILimitAPI } from '@/type/modules/system/menu'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { generalTreeFn } from '@/utils/tree'
-import SvgIcon from '@/components/SvgIcon'
-import { hasPermi } from '@/utils/auth'
+import ColorBtn from '@/components/ColorBtn';
+import DictTag from '@/components/DictTag';
+import IconSelect from '@/components/IconSelect';
+import { menusType, ILimitAPI } from '@/type/modules/system/menu';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { generalTreeFn } from '@/utils/tree';
+import SvgIcon from '@/components/SvgIcon';
+import { hasPermi } from '@/utils/auth';
 
 const Menu: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
 
   // 分页
-  const [queryParams, setQueryParams] = useState<ILimitAPI>({})
+  const [queryParams, setQueryParams] = useState<ILimitAPI>({});
   // 列表数据
-  const [dataList, setDataList] = useState<menusType[]>([])
+  const [dataList, setDataList] = useState<menusType[]>([]);
   // 保存编辑当前id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   //  行展开
-  const [expandKeys, setExpandKeys] = useState<any>({})
+  const [expandKeys, setExpandKeys] = useState<any>({});
   // 状态
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
-  const [dictVisible, setDictVisible] = useState<IdictType[]>([])
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
+  const [dictVisible, setDictVisible] = useState<IdictType[]>([]);
   const [formData, setFormData] = useState({
     icon: '',
     menuType: 'M',
-  })
-  const [openPopover, setOpenPopover] = useState(false)
+  });
+  const [openPopover, setOpenPopover] = useState(false);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const res = await getDictsApi('sys_normal_disable')
-        setDictStatus(res.data.result)
-        const shows = await getDictsApi('sys_show_hide')
-        setDictStatus(res.data.result)
-        setDictVisible(shows.data.result)
+        const res = await getDictsApi('sys_normal_disable');
+        setDictStatus(res.data.result);
+        const shows = await getDictsApi('sys_show_hide');
+        setDictStatus(res.data.result);
+        setDictVisible(shows.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
-      data.result.sort(
-        (a: { orderNum: number }, b: { orderNum: number }) => a.orderNum - b.orderNum,
-      )
-      const treeData = generalTreeFn(data.result, 'parentId', 'menuId') as unknown as menusType[]
-      setDataList(treeData)
-      setLoading(false)
+      const { data } = await getListAPI(queryParams);
+      data.result.sort((a: { orderNum: number }, b: { orderNum: number }) => a.orderNum - b.orderNum);
+      const treeData = generalTreeFn(data.result, 'parentId', 'menuId') as unknown as menusType[];
+      setDataList(treeData);
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    const form = queryForm.getFieldsValue()
-    setQueryParams({
-      ...form,
-    })
-  }
+    const form = queryForm.getFieldsValue();
+    setQueryParams({ ...form });
+  };
 
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setQueryParams({})
-  }
+    queryForm.resetFields();
+    setQueryParams({});
+  };
   const resetFormFn = () => {
-    addEditForm.resetFields()
-    setFormData({ icon: '', menuType: 'M' })
-  }
+    addEditForm.resetFields();
+    setFormData({ icon: '', menuType: 'M' });
+  };
 
   const handleEditForm = async (id: number) => {
     try {
-      setCurrentId(id)
-      const { data } = await getDetailAPI(id)
-      addEditForm.setFieldsValue(data.result)
-      setFormData({ menuType: data.result?.menuType as string, icon: data.result?.icon as string })
-      setIsModalOpen(true)
-      setIsAdd(false)
+      setCurrentId(id);
+      const { data } = await getDetailAPI(id);
+      addEditForm.setFieldsValue(data.result);
+      setFormData({ menuType: data.result?.menuType as string, icon: data.result?.icon as string });
+      setIsModalOpen(true);
+      setIsAdd(false);
     } catch (error) {}
-  }
+  };
 
   const handleAddForm = (record: menusType) => {
-    setIsAdd(true)
-    setIsModalOpen(true)
-    resetFormFn()
-    addEditForm.setFieldValue('parentId', record.menuId)
-  }
+    setIsAdd(true);
+    setIsModalOpen(true);
+    resetFormFn();
+    addEditForm.setFieldValue('parentId', record.menuId);
+  };
 
   const handleFormFinish = async (values: menusType) => {
     try {
       if (isAdd) {
-        const { data } = await addAPI({ ...values, ...formData })
-        message.success(data.message)
+        const { data } = await addAPI({ ...values, ...formData });
+        message.success(data.message);
       } else {
-        const { data } = await putAPI({ ...values, menuId: currentId as number, ...formData })
-        message.success(data.message)
+        const { data } = await putAPI({ ...values, menuId: currentId as number, ...formData });
+        message.success(data.message);
       }
-      setIsModalOpen(false)
-      resetFormFn()
-      getList()
+      setIsModalOpen(false);
+      resetFormFn();
+      getList();
     } catch (error) {}
-  }
-  //#region table
+  };
+  // #region table
 
   // 删除
   const delFn = (ids: string) => {
@@ -154,45 +126,39 @@ const Menu: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除字典编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          data.code === 200 ? message.success(data.message) : message.error(data.message)
-          setQueryParams({ ...queryParams })
+          const { data } = await delAPI(ids);
+          data.code === 200 ? message.success(data.message) : message.error(data.message);
+          setQueryParams({ ...queryParams });
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 行展开
   const expandFn = () => {
-    if (expandKeys['expandedRowKeys'] && expandKeys['expandedRowKeys'].length) {
-      setExpandKeys({
-        expandedRowKeys: [],
-      })
+    if (expandKeys.expandedRowKeys && expandKeys.expandedRowKeys.length) {
+      setExpandKeys({ expandedRowKeys: [] });
     } else {
-      setExpandKeys({
-        expandedRowKeys: [],
-      })
-      const ids: number[] = []
-      function checkChild(list: menusType[]) {
+      setExpandKeys({ expandedRowKeys: [] });
+      const ids: number[] = [];
+      const checkChild = (list: menusType[]) => {
         list.forEach((item) => {
           if (item.children?.length) {
-            ids.push(item.menuId as number)
+            ids.push(item.menuId as number);
 
-            checkChild(item.children)
+            checkChild(item.children);
           }
-        })
-      }
-      checkChild(dataList)
-      setExpandKeys({
-        expandedRowKeys: ids,
-      })
+        });
+      };
+      checkChild(dataList);
+      setExpandKeys({ expandedRowKeys: ids });
     }
-  }
+  };
 
   // table columns
-  let columns = [
+  const columns = [
     {
       title: '菜单名称',
       dataIndex: 'menuName',
@@ -229,9 +195,7 @@ const Menu: React.FC = () => {
       dataIndex: 'visible',
       key: 'visible',
       align: 'center',
-      render: (visible, record) => {
-        return record.menuType === 'F' ? null : <DictTag options={dictVisible} value={visible} />
-      },
+      render: (visible, record) => (record.menuType === 'F' ? null : <DictTag options={dictVisible} value={visible} />),
     },
     {
       title: '状态',
@@ -254,54 +218,28 @@ const Menu: React.FC = () => {
       fixed: 'right',
       render: (_: any, record: menusType) => (
         <div>
-          <Button
-            hidden={hasPermi('system:menu:add')}
-            onClick={() => handleEditForm(record.menuId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:menu:add')} onClick={() => handleEditForm(record.menuId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('system:menu:edit')}
-            onClick={() => handleAddForm(record)}
-            size="small"
-            icon={<PlusOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:menu:edit')} onClick={() => handleAddForm(record)} size="small" icon={<PlusOutlined />} type="link">
             新增
           </Button>
-          <Button
-            hidden={hasPermi('system:menu:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(`${record.menuId}`)}
-          >
+          <Button hidden={hasPermi('system:menu:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(`${record.menuId}`)}>
             删除
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<menusType>
+  ] as ColumnsType<menusType>;
 
   // table 数据源
-  const tableData = dataList
+  const tableData = dataList;
 
   return (
     <div className="app-container">
       <Row gutter={16}>
         <Col span={24}>
-          <Form
-            form={queryForm}
-            hidden={!searchShow}
-            layout="inline"
-            name={'query'}
-            initialValues={{}}
-            autoComplete="off"
-            className="leno-search"
-          >
+          <Form form={queryForm} hidden={!searchShow} layout="inline" name={'query'} initialValues={{}} autoComplete="off" className="leno-search">
             <Form.Item name="menuName" label="菜单名称">
               <Input style={{ width: 240 }} placeholder="请输入菜单名称" allowClear />
             </Form.Item>
@@ -334,8 +272,8 @@ const Menu: React.FC = () => {
                   <ColorBtn
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setIsModalOpen(true)
-                      setIsAdd(true)
+                      setIsModalOpen(true);
+                      setIsAdd(true);
                     }}
                   >
                     新增
@@ -356,7 +294,7 @@ const Menu: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -367,7 +305,7 @@ const Menu: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
+                        searchQueryFn();
                       }}
                     />
                   </Tooltip>
@@ -376,16 +314,7 @@ const Menu: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="menuId"
-              size="middle"
-              loading={loading}
-              expandable={expandKeys}
-              onExpand={() => setExpandKeys({})}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="menuId" size="middle" loading={loading} expandable={expandKeys} onExpand={() => setExpandKeys({})} />
           </div>
 
           {/* 添加 编辑 用户 */}
@@ -393,13 +322,13 @@ const Menu: React.FC = () => {
             title={isAdd ? '添加菜单' : '编辑菜单'}
             open={isModalOpen}
             onOk={() => {
-              addEditForm.submit()
+              addEditForm.submit();
             }}
             width="650px"
             onCancel={() => {
-              setOpenPopover(false)
-              setIsModalOpen(false)
-              resetFormFn()
+              setOpenPopover(false);
+              setIsModalOpen(false);
+              resetFormFn();
             }}
           >
             <Form
@@ -415,11 +344,7 @@ const Menu: React.FC = () => {
               }}
               onFinish={handleFormFinish}
             >
-              <Form.Item
-                label="上级菜单"
-                name="parentId"
-                rules={[{ required: true, message: '请选择上级菜单!' }]}
-              >
+              <Form.Item label="上级菜单" name="parentId" rules={[{ required: true, message: '请选择上级菜单!' }]}>
                 <TreeSelect
                   showSearch
                   style={{ width: '100%' }}
@@ -440,7 +365,7 @@ const Menu: React.FC = () => {
               <Form.Item label="菜单类型" name="menuType">
                 <Radio.Group
                   onChange={(event) => {
-                    setFormData({ ...formData, menuType: event.target.value })
+                    setFormData({ ...formData, menuType: event.target.value });
                   }}
                 >
                   <Radio value="M">目录</Radio>
@@ -455,8 +380,8 @@ const Menu: React.FC = () => {
                   content={
                     <IconSelect
                       onSubmit={(icon, open) => {
-                        setFormData({ ...formData, icon })
-                        setOpenPopover(open)
+                        setFormData({ ...formData, icon });
+                        setOpenPopover(open);
                       }}
                     />
                   }
@@ -464,9 +389,7 @@ const Menu: React.FC = () => {
                   placement="bottom"
                 >
                   <Input
-                    prefix={
-                      formData.icon ? <SvgIcon iconClass={formData.icon} /> : <SearchOutlined />
-                    }
+                    prefix={formData.icon ? <SvgIcon iconClass={formData.icon} /> : <SearchOutlined />}
                     onClick={() => setOpenPopover(!openPopover)}
                     placeholder="请点击选择图标"
                     readOnly
@@ -476,29 +399,17 @@ const Menu: React.FC = () => {
               </Form.Item>
               <Row gutter={24}>
                 <Col span={12}>
-                  <Form.Item
-                    label="菜单名称"
-                    name="menuName"
-                    rules={[{ required: true, message: '请输入菜单名称!' }]}
-                  >
+                  <Form.Item label="菜单名称" name="menuName" rules={[{ required: true, message: '请输入菜单名称!' }]}>
                     <Input placeholder="请输入菜单名称" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item
-                    label="显示排序"
-                    name="orderNum"
-                    rules={[{ required: true, message: '请输入数据键值!' }]}
-                  >
+                  <Form.Item label="显示排序" name="orderNum" rules={[{ required: true, message: '请输入数据键值!' }]}>
                     <InputNumber min={0} />
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'F'}>
-                  <Form.Item
-                    label="是否外链"
-                    name="isFrame"
-                    tooltip="选择是外链则路由地址需要以`http(s)://`开头"
-                  >
+                  <Form.Item label="是否外链" name="isFrame" tooltip="选择是外链则路由地址需要以`http(s)://`开头">
                     <Radio.Group>
                       <Radio value={0}>是</Radio>
                       <Radio value={1}>否</Radio>
@@ -516,38 +427,22 @@ const Menu: React.FC = () => {
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'M' || formData.menuType === 'F'}>
-                  <Form.Item
-                    label="组件路径"
-                    name="component"
-                    tooltip="访问的组件路径，如：`system/user/index`，默认在`views`目录下"
-                  >
+                  <Form.Item label="组件路径" name="component" tooltip="访问的组件路径，如：`system/user/index`，默认在`views`目录下">
                     <Input placeholder="请输入组件路径" />
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'M'}>
-                  <Form.Item
-                    label="权限字符"
-                    name="perms"
-                    tooltip="控制器中定义的权限字符，如：system:user:list"
-                  >
+                  <Form.Item label="权限字符" name="perms" tooltip="控制器中定义的权限字符，如：system:user:list">
                     <Input placeholder="请输入权限字符" />
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'M' || formData.menuType === 'F'}>
-                  <Form.Item
-                    label="路由参数"
-                    name="query"
-                    tooltip='访问路由的默认传递参数，如：{"id": 1, "name": "ry"}'
-                  >
+                  <Form.Item label="路由参数" name="query" tooltip='访问路由的默认传递参数，如：{"id": 1, "name": "ry"}'>
                     <Input placeholder="请输入路由参数" />
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'M' || formData.menuType === 'F'}>
-                  <Form.Item
-                    label="是否缓存"
-                    name="isCache"
-                    tooltip="选择是则会被`keep-alive`缓存，需要匹配组件的`name`和地址保持一致"
-                  >
+                  <Form.Item label="是否缓存" name="isCache" tooltip="选择是则会被`keep-alive`缓存，需要匹配组件的`name`和地址保持一致">
                     <Radio.Group>
                       <Radio value={0}>缓存</Radio>
                       <Radio value={1}>不缓存</Radio>
@@ -555,11 +450,7 @@ const Menu: React.FC = () => {
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'F'}>
-                  <Form.Item
-                    name="visible"
-                    label="显示状态"
-                    tooltip="选择隐藏则路由将不会出现在侧边栏，但仍然可以访问"
-                  >
+                  <Form.Item name="visible" label="显示状态" tooltip="选择隐藏则路由将不会出现在侧边栏，但仍然可以访问">
                     <Radio.Group
                       options={dictVisible.map((item) => ({
                         value: item.dictValue,
@@ -569,11 +460,7 @@ const Menu: React.FC = () => {
                   </Form.Item>
                 </Col>
                 <Col span={12} hidden={formData.menuType === 'F'}>
-                  <Form.Item
-                    label="菜单状态"
-                    name="status"
-                    tooltip="选择停用则路由将不会出现在侧边栏，也不能被访问"
-                  >
+                  <Form.Item label="菜单状态" name="status" tooltip="选择停用则路由将不会出现在侧边栏，也不能被访问">
                     <Radio.Group
                       options={dictStatus.map((item) => ({
                         value: item.dictValue,
@@ -588,7 +475,7 @@ const Menu: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default Menu
+export default Menu;

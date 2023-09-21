@@ -1,33 +1,33 @@
-import { useEffect, useState } from 'react'
-import classes from './index.module.scss'
-import { Card, Row, Col } from 'antd'
-import { FileTextOutlined, DesktopOutlined, MacCommandOutlined } from '@ant-design/icons'
-import SvgIcon from '@/components/SvgIcon'
-import { getListAPI } from '@/api/modules/monitor/server'
-import { IserverType } from '@/type/modules/monitor/server'
-import useStore from '@/store'
+import { useEffect, useState } from 'react';
+import { Card, Row, Col } from 'antd';
+import { FileTextOutlined, DesktopOutlined, MacCommandOutlined } from '@ant-design/icons';
+import SvgIcon from '@/components/SvgIcon';
+import { getListAPI } from '@/api/modules/monitor/server';
+import { IserverType } from '@/type/modules/monitor/server';
+import useStore from '@/store';
+import classes from './index.module.scss';
 
 const Server = () => {
-  const [info, setInfo] = useState<IserverType>()
+  const [info, setInfo] = useState<IserverType>();
   const {
     useGlobalStore: { changeIsContentLoading },
-  } = useStore()
+  } = useStore();
 
   useEffect(() => {
-    changeIsContentLoading(true)
+    changeIsContentLoading(true);
     async function init() {
       try {
         const {
           data: { result },
-        } = await getListAPI()
-        setInfo(result)
-        changeIsContentLoading(false)
+        } = await getListAPI();
+        setInfo(result);
+        changeIsContentLoading(false);
       } catch (error) {
-        changeIsContentLoading(false)
+        changeIsContentLoading(false);
       }
     }
-    init()
-  }, [])
+    init();
+  }, []);
 
   return (
     <div className="app-container">
@@ -236,7 +236,7 @@ const Server = () => {
         </Row>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Server
+export default Server;

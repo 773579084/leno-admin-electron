@@ -1,27 +1,11 @@
 .site-layout-background {
-  background: #fff;
+  background: #ffffff;
 
-  :global{
-    .ka-wrapper,.ka-content {
+  :global {
+
+    .ka-wrapper,
+    .ka-content {
       height: 100%;
     }
-  }
-
-  .router-animation {
-    animation: fade .5s linear;
-  }
-}
-
-@keyframes fade {
-  0% {
-    opacity: 0;
-    transform: translateX(-60px);
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0px);
   }
 }

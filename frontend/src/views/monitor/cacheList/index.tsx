@@ -1,99 +1,83 @@
-import { useEffect, useState } from 'react'
-import classes from './index.module.scss'
-import { Card, Row, Col, Button, Modal, Form, Input, Tooltip, message } from 'antd'
-import {
-  KeyOutlined,
-  FileTextOutlined,
-  BookOutlined,
-  RedoOutlined,
-  DeleteOutlined,
-} from '@ant-design/icons'
-import {
-  getCacheListAPI,
-  getCacheKeysAPI,
-  getCacheContentAPI,
-  clearCacheKeyAPI,
-  clearCacheKeyAllAPI,
-} from '@/api/modules/monitor/cache'
-import { ICacheKeyType, ICacheListType } from '@/type/modules/monitor/cache'
-import Table, { ColumnsType } from 'antd/lib/table'
-import TextArea from 'antd/lib/input/TextArea'
+import { useEffect, useState } from 'react';
+import { Card, Row, Col, Button, Form, Input, Tooltip, message } from 'antd';
+import { KeyOutlined, FileTextOutlined, BookOutlined, RedoOutlined, DeleteOutlined } from '@ant-design/icons';
+import { getCacheListAPI, getCacheKeysAPI, getCacheContentAPI, clearCacheKeyAPI, clearCacheKeyAllAPI } from '@/api/modules/monitor/cache';
+import { ICacheKeyType, ICacheListType } from '@/type/modules/monitor/cache';
+import Table, { ColumnsType } from 'antd/lib/table';
+import TextArea from 'antd/lib/input/TextArea';
+import classes from './index.module.scss';
 
 const CacheList = () => {
-  const [cacheForm] = Form.useForm()
+  const [cacheForm] = Form.useForm();
 
   // 缓存列表
-  const [cacheList, setCacheList] = useState<ICacheListType[]>()
+  const [cacheList, setCacheList] = useState<ICacheListType[]>([]);
   // 当前的缓存列表名
-  const [cacheName, setCacheName] = useState('')
+  const [cacheName, setCacheName] = useState('');
   // 键列表
-  const [keyList, setKeyList] = useState<ICacheKeyType[]>()
+  const [keyList, setKeyList] = useState<ICacheKeyType[]>();
 
   // cache loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // key loading
-  const [keyLoading, setkeyLoading] = useState(false)
+  const [keyLoading, setkeyLoading] = useState(false);
 
   const getList = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const {
         data: { result },
-      } = await getCacheListAPI()
-      setCacheList(result)
-      setLoading(false)
+      } = await getCacheListAPI();
+      setCacheList(result);
+      setLoading(false);
     } catch (error) {}
-  }
+  };
 
   useEffect(() => {
-    getList()
-  }, [])
-
-  // 删除
-  const delFn = async (id: string): Promise<void> => {
-    try {
-      await clearCacheKeyAPI(id)
-      if (id.indexOf(':') !== -1) {
-        getKeysList(cacheName)
-        message.success(`清理缓存键名[${id}]成功`)
-      } else {
-        getList()
-        getKeysList(cacheName)
-        message.success(`清理缓存名称[${id}]成功`)
-      }
-    } catch (error) {}
-  }
+    getList();
+  }, []);
 
   // 获取键名列表
   const getKeysList = async (key: string) => {
     try {
-      setkeyLoading(true)
-      setCacheName(key)
+      setkeyLoading(true);
+      setCacheName(key);
       const {
         data: { result },
-      } = await getCacheKeysAPI(key)
-      const keysList = result.map((item) => {
-        return {
-          cacheKey: item,
-        }
-      })
-      setKeyList(keysList)
-      setkeyLoading(false)
+      } = await getCacheKeysAPI(key);
+      const keysList = result.map((item) => ({ cacheKey: item }));
+      setKeyList(keysList);
+      setkeyLoading(false);
     } catch (error) {}
-  }
+  };
+
+  // 删除
+  const delFn = async (id: string): Promise<void> => {
+    try {
+      await clearCacheKeyAPI(id);
+      if (id.indexOf(':') !== -1) {
+        getKeysList(cacheName);
+        message.success(`清理缓存键名[${id}]成功`);
+      } else {
+        getList();
+        getKeysList(cacheName);
+        message.success(`清理缓存名称[${id}]成功`);
+      }
+    } catch (error) {}
+  };
 
   // 获取缓存内容
   const getCacheContent = async (key: string) => {
     try {
       const {
         data: { result },
-      } = await getCacheContentAPI(`${cacheName}:${key}`)
-      cacheForm.setFieldsValue(result)
+      } = await getCacheContentAPI(`${cacheName}:${key}`);
+      cacheForm.setFieldsValue(result);
     } catch (error) {}
-  }
+  };
 
   // 缓存列表 table
-  let columns = [
+  const columns = [
     {
       title: '序号',
       dataIndex: 'index',
@@ -106,9 +90,7 @@ const CacheList = () => {
       dataIndex: 'cacheName',
       key: 'cacheName',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -120,9 +102,7 @@ const CacheList = () => {
       dataIndex: 'remark',
       key: 'remark',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -141,8 +121,8 @@ const CacheList = () => {
             icon={<DeleteOutlined />}
             type="link"
             onClick={(event) => {
-              delFn(record.cacheName)
-              event.stopPropagation()
+              delFn(record.cacheName);
+              event.stopPropagation();
             }}
           >
             删除
@@ -150,11 +130,11 @@ const CacheList = () => {
         </div>
       ),
     },
-  ] as ColumnsType<ICacheListType>
-  const cacheData = cacheList
+  ] as ColumnsType<ICacheListType>;
+  const cacheData = cacheList;
 
   // 键名列表 table
-  let keys = [
+  const keys = [
     {
       title: '序号',
       dataIndex: 'index',
@@ -167,9 +147,7 @@ const CacheList = () => {
       dataIndex: 'cacheKey',
       key: 'cacheKey',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -188,8 +166,8 @@ const CacheList = () => {
             icon={<DeleteOutlined />}
             type="link"
             onClick={(event) => {
-              delFn(cacheName + ':' + record.cacheKey)
-              event.stopPropagation()
+              delFn(`${cacheName}:${record.cacheKey}`);
+              event.stopPropagation();
             }}
           >
             删除
@@ -197,20 +175,20 @@ const CacheList = () => {
         </div>
       ),
     },
-  ] as ColumnsType<ICacheKeyType>
-  const keysData = keyList
+  ] as ColumnsType<ICacheKeyType>;
+  const keysData = keyList;
 
   return (
     <div className="app-container">
       <div className={classes['site-layout-background']}>
-        <Row gutter={24} style={{ height: 100 + '%' }}>
+        <Row gutter={24} style={{ height: `${100}%` }}>
           <Col span={8}>
             <Card
               extra={
                 <RedoOutlined
                   onClick={() => {
-                    getList()
-                    message.success('刷新缓存列表成功')
+                    getList();
+                    message.success('刷新缓存列表成功');
                   }}
                   style={{ color: '#189eff', transform: 'rotate(-90deg)' }}
                 />
@@ -229,13 +207,11 @@ const CacheList = () => {
                   rowKey="cacheName"
                   size="middle"
                   loading={loading}
-                  onRow={(record) => {
-                    return {
-                      onClick: (event) => {
-                        getKeysList(record.cacheName)
-                      },
-                    }
-                  }}
+                  onRow={(record) => ({
+                    onClick: () => {
+                      getKeysList(record.cacheName);
+                    },
+                  })}
                 />
               </div>
             </Card>
@@ -245,8 +221,8 @@ const CacheList = () => {
               extra={
                 <RedoOutlined
                   onClick={() => {
-                    cacheName ? getKeysList(cacheName) : null
-                    message.success('刷新键名列表成功')
+                    if (cacheName) getKeysList(cacheName);
+                    message.success('刷新键名列表成功');
                   }}
                   style={{ color: '#189eff', transform: 'rotate(-90deg)' }}
                 />
@@ -265,13 +241,11 @@ const CacheList = () => {
                   rowKey="cacheKey"
                   size="middle"
                   loading={keyLoading}
-                  onRow={(record) => {
-                    return {
-                      onClick: (event) => {
-                        getCacheContent(record.cacheKey)
-                      },
-                    }
-                  }}
+                  onRow={(record) => ({
+                    onClick: () => {
+                      getCacheContent(record.cacheKey);
+                    },
+                  })}
                 />
               </div>
             </Card>
@@ -282,15 +256,14 @@ const CacheList = () => {
                 <div
                   onClick={async () => {
                     try {
-                      cacheForm.resetFields()
-                      await clearCacheKeyAllAPI()
-                      message.success('清理全部缓存成功')
+                      cacheForm.resetFields();
+                      await clearCacheKeyAllAPI();
+                      message.success('清理全部缓存成功');
                     } catch (error) {}
                   }}
                   style={{ color: '#189eff', cursor: 'pointer' }}
                 >
-                  <RedoOutlined style={{ color: '#189eff', transform: 'rotate(-90deg)' }} />{' '}
-                  清理全部
+                  <RedoOutlined style={{ color: '#189eff', transform: 'rotate(-90deg)' }} /> 清理全部
                 </div>
               }
               title={
@@ -315,7 +288,7 @@ const CacheList = () => {
         </Row>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CacheList
+export default CacheList;

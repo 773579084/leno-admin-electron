@@ -1,17 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  DatePicker,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  message,
-} from 'antd'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, DatePicker, Col, Row, Tooltip, Table, Pagination, Modal, message } from 'antd';
 import {
   SyncOutlined,
   SearchOutlined,
@@ -22,108 +10,110 @@ import {
   ExclamationCircleOutlined,
   DownloadOutlined,
   CloudUploadOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { codePreviewAPI, delAPI, genCodeAPI, getListAPI } from '@/api/modules/tool/gen'
-import { GenType, ILimitAPI, IPreview } from '@/type/modules/tool/gen'
-const { RangePicker } = DatePicker
-import ColorBtn from '@/components/ColorBtn'
-import dayjs from 'dayjs'
-import Preview from './component/Preview'
-import { useNavigate } from 'react-router-dom'
-import ImportTable from './component/ImportTable'
-import OmsSyntaxHighlight from './component/OmsSyntaxHighlight'
-import { download } from '@/api'
-import { hasPermi } from '@/utils/auth'
-import { pageDelJump } from '@/utils'
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { codePreviewAPI, delAPI, genCodeAPI, getListAPI } from '@/api/modules/tool/gen';
+import { GenType, ILimitAPI, IPreview } from '@/type/modules/tool/gen';
+import ColorBtn from '@/components/ColorBtn';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import { download } from '@/api';
+import { hasPermi } from '@/utils/auth';
+import { pageDelJump } from '@/utils';
+import OmsSyntaxHighlight from './component/OmsSyntaxHighlight';
+import ImportTable from './component/ImportTable';
+import Preview from './component/Preview';
+
+const { RangePicker } = DatePicker;
 
 const Gen: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const { confirm } = Modal
-  const navigate = useNavigate()
+  const [queryForm] = Form.useForm();
+  const { confirm } = Modal;
+  const navigate = useNavigate();
 
   // 分页
-  const [queryParams, setQueryParams] = useState<ILimitAPI>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<ILimitAPI>({ pageNum: 1, pageSize: 10 });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as any })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as any });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 预览 model显隐
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   // 非单个禁用
-  const [single, setSingle] = useState(true)
+  const [single, setSingle] = useState(true);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   // table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 导入 model显隐
-  const [isImportOpen, setIsImportOpen] = useState(false)
+  const [isImportOpen, setIsImportOpen] = useState(false);
   // 代码预览
-  const [codePreviewData, setCodePreviewData] = useState<IPreview[]>()
+  const [codePreviewData, setCodePreviewData] = useState<IPreview[]>();
   // 代码预览的数据代码
-  const [codePreviewSource, setCodePreviewSource] = useState({})
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+  const [codePreviewSource, setCodePreviewSource] = useState({});
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
+      const { data } = await getListAPI(queryParams);
 
-      setDataList({ ...data.result })
-      setLoading(false)
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let { createdAt, ...form } = queryForm.getFieldsValue()
+    // eslint-disable-next-line prefer-const
+    let { createdAt, ...form } = queryForm.getFieldsValue();
     if (createdAt) {
       form = {
         ...form,
         beginTime: dayjs(createdAt[0]).format('YYYY-MM-DD HH:mm:ss'),
         endTime: dayjs(createdAt[1]).format('YYYY-MM-DD HH:mm:ss'),
-      }
+      };
     }
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: GenType[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       if (!selectedRowKeys.length || selectedRowKeys.length > 1) {
-        setSingle(true)
+        setSingle(true);
       } else {
-        setSingle(false)
+        setSingle(false);
       }
-      setSelectKeys(selectedRowKeys)
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setRowKeys(selectedRowKeys.join(','))
+      setSelectKeys(selectedRowKeys);
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
-  //#region table
+  // #region table
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -131,39 +121,41 @@ const Gen: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除字典编号为"${ids}"的数据项？`,
       centered: true,
+      // eslint-disable-next-line no-restricted-syntax
       async onOk() {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          setSelectKeys([])
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          setSelectKeys([]);
 
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 预览
   const codePreview = async (id: number) => {
     try {
-      const { data } = await codePreviewAPI(id)
-      setCodePreviewSource(data.result)
+      const { data } = await codePreviewAPI(id);
+      setCodePreviewSource(data.result);
 
-      const previewItems = []
-      for (let key in data.result) {
+      const previewItems = [];
+      // eslint-disable-next-line guard-for-in
+      for (const key in data.result) {
         previewItems.push({
           label: key,
-          key: key,
+          key,
           children: <OmsSyntaxHighlight textContent={data.result[key]} language={'typescript'} />,
-        })
+        });
       }
-      setCodePreviewData(previewItems)
-      setIsPreviewOpen(true)
+      setCodePreviewData(previewItems);
+      setIsPreviewOpen(true);
     } catch (error) {}
-  }
+  };
 
   // table columns
-  let columns = [
+  const columns = [
     {
       title: '序号',
       dataIndex: 'tableId',
@@ -212,19 +204,13 @@ const Gen: React.FC = () => {
       fixed: 'right',
       render: (_: any, record) => (
         <div>
-          <Button
-            hidden={hasPermi('tool:gen:preview')}
-            onClick={() => codePreview(record.tableId)}
-            size="small"
-            icon={<EyeOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('tool:gen:preview')} onClick={() => codePreview(record.tableId)} size="small" icon={<EyeOutlined />} type="link">
             预览
           </Button>
           <Button
             hidden={hasPermi('tool:gen:edit')}
             onClick={() => {
-              navigate(`/tool/genEdit/${record.tableId}`)
+              navigate(`/tool/genEdit/${record.tableId}`);
             }}
             size="small"
             icon={<EditOutlined />}
@@ -232,27 +218,15 @@ const Gen: React.FC = () => {
           >
             修改
           </Button>
-          <Button
-            hidden={hasPermi('tool:gen:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(`${record.tableId}`)}
-          >
+          <Button hidden={hasPermi('tool:gen:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(`${record.tableId}`)}>
             删除
           </Button>
           <Button
             hidden={hasPermi('tool:gen:code')}
             onClick={async () => {
               try {
-                record.genType === '0'
-                  ? download(
-                      `/tool/gen/batchGenCode/generatedCode/${record.tableId}`,
-                      'leno-admin',
-                      'zip',
-                    )
-                  : await genCodeAPI(record.tableId)
-                message.success('代码生成完成')
+                record.genType === '0' ? download(`/tool/gen/batchGenCode/generatedCode/${record.tableId}`, 'leno-admin', 'zip') : await genCodeAPI(record.tableId);
+                message.success('代码生成完成');
               } catch (error) {}
             }}
             size="small"
@@ -264,40 +238,22 @@ const Gen: React.FC = () => {
         </div>
       ),
     },
-  ] as ColumnsType<GenType>
+  ] as ColumnsType<GenType>;
 
   // table 数据源
-  const tableData = dataList.rows
-  //#endregion
+  const tableData = dataList.rows;
+  // #endregion
 
   return (
     <div className="app-container">
       <Row gutter={16}>
         <Col span={24}>
-          <Form
-            form={queryForm}
-            hidden={!searchShow}
-            layout="inline"
-            name={'query'}
-            initialValues={{ remember: true }}
-            autoComplete="off"
-            className="leno-search"
-          >
+          <Form form={queryForm} hidden={!searchShow} layout="inline" name={'query'} initialValues={{ remember: true }} autoComplete="off" className="leno-search">
             <Form.Item label="表名称" name="tableName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入表名称"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入表名称" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="表描述" name="tableComment">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入表描述"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入表描述" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="创建时间" name="createdAt">
               <RangePicker style={{ width: 240 }} />
@@ -323,11 +279,7 @@ const Gen: React.FC = () => {
                     icon={<VerticalAlignBottomOutlined />}
                     onClick={() => {
                       try {
-                        download(
-                          `/tool/gen/batchGenCode/generatedCode/${rowKeys}`,
-                          'leno-admin',
-                          'zip',
-                        )
+                        download(`/tool/gen/batchGenCode/generatedCode/${rowKeys}`, 'leno-admin', 'zip');
                       } catch (error) {}
                     }}
                   >
@@ -340,7 +292,7 @@ const Gen: React.FC = () => {
                     color="info"
                     icon={<CloudUploadOutlined />}
                     onClick={() => {
-                      setIsImportOpen(true)
+                      setIsImportOpen(true);
                     }}
                   >
                     导入
@@ -353,20 +305,14 @@ const Gen: React.FC = () => {
                     color="success"
                     icon={<EditOutlined />}
                     onClick={() => {
-                      navigate(`/tool/genEdit/${rowKeys}`)
+                      navigate(`/tool/genEdit/${rowKeys}`);
                     }}
                   >
                     修改
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('tool:gen:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('tool:gen:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
@@ -380,7 +326,7 @@ const Gen: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -391,7 +337,7 @@ const Gen: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
+                        searchQueryFn();
                       }}
                     />
                   </Tooltip>
@@ -400,24 +346,8 @@ const Gen: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="tableId"
-              size="middle"
-              loading={loading}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} columns={columns} dataSource={tableData} pagination={false} rowKey="tableId" size="middle" loading={loading} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           {/* 预览 */}
@@ -426,7 +356,7 @@ const Gen: React.FC = () => {
             codePreviewData={codePreviewData}
             codePreviewSource={codePreviewSource}
             onCancel={() => {
-              setIsPreviewOpen(false)
+              setIsPreviewOpen(false);
             }}
           />
 
@@ -434,17 +364,17 @@ const Gen: React.FC = () => {
           <ImportTable
             isImportOpen={isImportOpen}
             onCancel={() => {
-              setIsImportOpen(false)
+              setIsImportOpen(false);
             }}
             onSubmit={() => {
-              setIsImportOpen(false)
-              getList()
+              setIsImportOpen(false);
+              getList();
             }}
           />
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default Gen
+export default Gen;

@@ -1,141 +1,132 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Modal,
-  Radio,
-  TreeSelect,
-  InputNumber,
-  message,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-  SwapOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/dept'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { IdeptType, ITreeType } from '@/type/modules/system/dept'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, Select, Col, Row, Tooltip, Table, Modal, Radio, TreeSelect, InputNumber, message } from 'antd';
+import { SyncOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/dept';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { IdeptType, ITreeType } from '@/type/modules/system/dept';
 
-import ColorBtn from '@/components/ColorBtn'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import { generalTreeFn } from '@/utils/tree'
-import { hasPermi } from '@/utils/auth'
+import ColorBtn from '@/components/ColorBtn';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import { generalTreeFn } from '@/utils/tree';
+import { hasPermi } from '@/utils/auth';
 
 const SysDept: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
 
   // 搜索
-  const [queryParams, setQueryParams] = useState<IdeptType>({})
+  const [queryParams, setQueryParams] = useState<IdeptType>({});
   // 列表数据
-  const [dataList, setDataList] = useState<ITreeType[]>([])
+  const [dataList, setDataList] = useState<ITreeType[]>([]);
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 当前编辑的id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
   //  行展开
-  const [expandKeys, setExpandKeys] = useState<any>({})
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
+  const [expandKeys, setExpandKeys] = useState<any>({});
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const sys_normal_disable = await getDictsApi('sys_normal_disable')
-        setDictStatus(sys_normal_disable.data.result)
+        const sys_normal_disable = await getDictsApi('sys_normal_disable');
+        setDictStatus(sys_normal_disable.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
+    };
+    getDictsFn();
+  }, []);
 
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+  const checkExpandKeys = (data: ITreeType[]) => {
+    setExpandKeys({ expandedRowKeys: [] });
+    const ids: number[] = [];
+    function checkChild(list: ITreeType[]) {
+      list.forEach((item) => {
+        if (item.children?.length) {
+          ids.push(item.deptId as number);
+          checkChild(item.children);
+        }
+      });
+    }
+    checkChild(data);
+    setExpandKeys({ expandedRowKeys: ids });
+  };
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI()
+      const { data } = await getListAPI();
 
       data.result.rows.sort((a, b) => {
-        const a1 = a.orderNum as number
-        const b1 = b.orderNum as number
-        return a1 - b1
-      })
-      const treeData = generalTreeFn(data.result.rows, 'parentId', 'deptId') as ITreeType[]
+        const a1 = a.orderNum as number;
+        const b1 = b.orderNum as number;
+        return a1 - b1;
+      });
+      const treeData = generalTreeFn(data.result.rows, 'parentId', 'deptId') as ITreeType[];
 
-      setDataList(treeData)
-      checkExpandKeys(treeData)
-      setLoading(false)
+      setDataList(treeData);
+      checkExpandKeys(treeData);
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let form = queryForm.getFieldsValue()
-    setQueryParams({
-      ...form,
-    })
-  }
+    const form = queryForm.getFieldsValue();
+    setQueryParams({ ...form });
+  };
 
   // 重置
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setQueryParams({})
-  }
+    queryForm.resetFields();
+    setQueryParams({});
+  };
 
   // 获取详情
   const handleEditForm = async (id: number) => {
     try {
-      const { data } = await getDetailAPI(id)
-      setCurrentId(id)
-      setIsModalOpen(true)
-      setIsAdd(false)
-      addEditForm.setFieldsValue(data.result as unknown as IdeptType)
+      const { data } = await getDetailAPI(id);
+      setCurrentId(id);
+      setIsModalOpen(true);
+      setIsAdd(false);
+      addEditForm.setFieldsValue(data.result as unknown as IdeptType);
     } catch (error) {}
-  }
+  };
 
   // 编辑
   const handleFormFinish = async (values: IdeptType) => {
     try {
       if (isAdd) {
-        const { data } = await addAPI(values)
-        message.success(data.message)
+        const { data } = await addAPI(values);
+        message.success(data.message);
       } else {
-        const { data } = await putAPI({ ...values, deptId: currentId })
-        message.success(data.message)
+        const { data } = await putAPI({ ...values, deptId: currentId });
+        message.success(data.message);
       }
     } catch (error) {}
-    setIsModalOpen(false)
-    addEditForm.resetFields()
-    getList()
-  }
+    setIsModalOpen(false);
+    addEditForm.resetFields();
+    getList();
+  };
 
   // 新增
   const handleAddForm = (record: IdeptType) => {
-    setIsAdd(true)
-    setIsModalOpen(true)
-    addEditForm.setFieldValue('parentId', record.deptId)
-  }
+    setIsAdd(true);
+    setIsModalOpen(true);
+    addEditForm.setFieldValue('parentId', record.deptId);
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -143,47 +134,27 @@ const SysDept: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除字典编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          getList()
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          getList();
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 行展开
   const expandFn = () => {
-    if (expandKeys['expandedRowKeys'] && expandKeys['expandedRowKeys'].length) {
-      setExpandKeys({
-        expandedRowKeys: [],
-      })
+    if (expandKeys.expandedRowKeys && expandKeys.expandedRowKeys.length) {
+      setExpandKeys({ expandedRowKeys: [] });
     } else {
-      checkExpandKeys(dataList)
+      checkExpandKeys(dataList);
     }
-  }
-  const checkExpandKeys = (data: ITreeType[]) => {
-    setExpandKeys({
-      expandedRowKeys: [],
-    })
-    const ids: number[] = []
-    function checkChild(list: ITreeType[]) {
-      list.forEach((item) => {
-        if (item.children?.length) {
-          ids.push(item.deptId as number)
-          checkChild(item.children)
-        }
-      })
-    }
-    checkChild(data)
-    setExpandKeys({
-      expandedRowKeys: ids,
-    })
-  }
+  };
 
   // table
-  let columns = [
+  const columns = [
     {
       title: '区域名称',
       dataIndex: 'deptName',
@@ -216,40 +187,22 @@ const SysDept: React.FC = () => {
       fixed: 'right',
       render: (_: any, record: IdeptType) => (
         <div>
-          <Button
-            hidden={hasPermi('system:dept:edit')}
-            onClick={() => handleEditForm(record.deptId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:dept:edit')} onClick={() => handleEditForm(record.deptId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('system:dept:add')}
-            onClick={() => handleAddForm(record)}
-            size="small"
-            icon={<PlusOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:dept:add')} onClick={() => handleAddForm(record)} size="small" icon={<PlusOutlined />} type="link">
             新增
           </Button>
-          <Button
-            hidden={!record.parentId || hasPermi('system:dept:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(String(record.deptId))}
-          >
+          <Button hidden={!record.parentId || hasPermi('system:dept:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(String(record.deptId))}>
             删除
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<IdeptType>
+  ] as ColumnsType<IdeptType>;
 
   // table 数据源
-  const tableData = dataList
+  const tableData = dataList;
 
   return (
     <div className="app-container">
@@ -257,12 +210,7 @@ const SysDept: React.FC = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="区域名称" name="deptName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入区域名称"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入区域名称" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item name="status" label="状态">
               <Select
@@ -295,8 +243,8 @@ const SysDept: React.FC = () => {
                     hidden={hasPermi('system:dept:add')}
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setIsModalOpen(true)
-                      setIsAdd(true)
+                      setIsModalOpen(true);
+                      setIsAdd(true);
                     }}
                   >
                     新增
@@ -317,7 +265,7 @@ const SysDept: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -328,7 +276,7 @@ const SysDept: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
+                        searchQueryFn();
                       }}
                     />
                   </Tooltip>
@@ -337,16 +285,7 @@ const SysDept: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="deptId"
-              size="middle"
-              loading={loading}
-              expandable={expandKeys}
-              onExpand={() => setExpandKeys({})}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="deptId" size="middle" loading={loading} expandable={expandKeys} onExpand={() => setExpandKeys({})} />
           </div>
 
           {/* 添加 编辑 用户 */}
@@ -355,8 +294,8 @@ const SysDept: React.FC = () => {
             open={isModalOpen}
             onOk={() => addEditForm.submit()}
             onCancel={() => {
-              setIsModalOpen(false)
-              addEditForm.resetFields()
+              setIsModalOpen(false);
+              addEditForm.resetFields();
             }}
             width={600}
           >
@@ -369,13 +308,7 @@ const SysDept: React.FC = () => {
                 orderNum: 0,
               }}
             >
-              <Form.Item
-                label="上级区域"
-                name="parentId"
-                rules={[{ required: true, message: '请选择上级区域!' }]}
-                hidden={!isAdd}
-                labelCol={{ span: 3.5 }}
-              >
+              <Form.Item label="上级区域" name="parentId" rules={[{ required: true, message: '请选择上级区域!' }]} hidden={!isAdd} labelCol={{ span: 3.5 }}>
                 <TreeSelect
                   showSearch
                   fieldNames={{ value: 'deptId', label: 'deptName' }}
@@ -388,22 +321,12 @@ const SysDept: React.FC = () => {
               </Form.Item>
               <Row gutter={24}>
                 <Col span={12}>
-                  <Form.Item
-                    label="区域名称"
-                    name="deptName"
-                    hidden={false}
-                    rules={[{ required: true, message: '请输入区域名称!' }]}
-                  >
+                  <Form.Item label="区域名称" name="deptName" hidden={false} rules={[{ required: true, message: '请输入区域名称!' }]}>
                     <Input placeholder="请输入区域名称" />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item
-                    label="显示顺序"
-                    name="orderNum"
-                    hidden={false}
-                    rules={[{ required: true, message: '请输入显示顺序!' }]}
-                  >
+                  <Form.Item label="显示顺序" name="orderNum" hidden={false} rules={[{ required: true, message: '请输入显示顺序!' }]}>
                     <InputNumber min={0} />
                   </Form.Item>
                 </Col>
@@ -442,7 +365,7 @@ const SysDept: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default SysDept
+export default SysDept;

@@ -1,67 +1,60 @@
-import React from 'react'
-import { Button, Form, Input, message, Space } from 'antd'
-import { IChangePwd } from '@/type'
-import { updatePwdAPI } from '@/api/modules/user'
-import { useNavigate, useLocation } from 'react-router-dom'
-import useStore from '@/store'
-import { HOME_URL } from '@/config/config'
+import React from 'react';
+import { Button, Form, Input, message, Space } from 'antd';
+import { IChangePwd } from '@/type';
+import { updatePwdAPI } from '@/api/modules/user';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useStore from '@/store';
+import { HOME_URL } from '@/config/config';
 
 const layout = {
   labelCol: { span: 3 },
   wrapperCol: { span: 21 },
-}
-const tailLayout = {
-  wrapperCol: { offset: 3, span: 21 },
-}
+};
+const tailLayout = { wrapperCol: { offset: 3, span: 21 } };
 
 const ChangePwd = () => {
-  const [form] = Form.useForm()
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const {
     useLayoutStore: { defaultObjMobx, changeTabsListMobx },
-  } = useStore()
+  } = useStore();
 
   const onClose = () => {
-    form.resetFields()
-    const newTabs = defaultObjMobx.tabsListMobx.filter((item) => item.path !== pathname)
-    changeTabsListMobx(newTabs)
-    navigate(HOME_URL)
-  }
+    form.resetFields();
+    const newTabs = defaultObjMobx.tabsListMobx.filter((item) => item.path !== pathname);
+    changeTabsListMobx(newTabs);
+    navigate(HOME_URL);
+  };
 
   const onFinish = async ({ newPwd, oldPwd }: IChangePwd) => {
     try {
-      const res = await updatePwdAPI({ oldPwd, newPwd })
-      message.success(res.data.message)
-      form.resetFields()
+      const res = await updatePwdAPI({ oldPwd, newPwd });
+      message.success(res.data.message);
+      form.resetFields();
     } catch (error) {
-      form.resetFields()
+      form.resetFields();
     }
-  }
+  };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo)
-  }
+    console.log('Failed:', errorInfo);
+  };
 
   // 自定义验证
   const equalPwdFn = (val: string) => {
-    const { newPwd } = form.getFieldsValue()
+    const { newPwd } = form.getFieldsValue();
     if (newPwd !== val) {
       return new Promise((resolve, reject) => {
-        reject('两次密码输入不一致!')
-      })
+        // eslint-disable-next-line prefer-promise-reject-errors
+        reject('两次密码输入不一致!');
+      });
     }
-    return Promise.resolve()
-  }
+    return Promise.resolve();
+  };
 
   return (
-    <Form
-      {...layout}
-      form={form}
-      name="control-pwd"
-      onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
-    >
+    <Form {...layout} form={form} name="control-pwd" onFinish={onFinish} onFinishFailed={onFinishFailed}>
       <Form.Item
         name="oldPwd"
         label="旧密码"
@@ -113,7 +106,7 @@ const ChangePwd = () => {
         </Space>
       </Form.Item>
     </Form>
-  )
-}
+  );
+};
 
-export default ChangePwd
+export default ChangePwd;

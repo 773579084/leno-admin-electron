@@ -1,169 +1,142 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  Radio,
-  message,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  VerticalAlignBottomOutlined,
-  ExclamationCircleOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import {
-  getListAPI,
-  delTypeAPI,
-  getTypeAPI,
-  addTypeAPI,
-  putTypeAPI,
-} from '@/api/modules/system/dictType'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { download } from '@/api'
-import { ILimitAPI, dictTableType, IdictDataType } from '@/type'
-const { RangePicker } = DatePicker
-import ColorBtn from '@/components/ColorBtn'
-import dayjs from 'dayjs'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import { hasPermi } from '@/utils/auth'
-import { pageDelJump } from '@/utils'
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Button, Form, Input, Select, DatePicker, Col, Row, Tooltip, Table, Pagination, Modal, Radio, message } from 'antd';
+import { SyncOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, VerticalAlignBottomOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delTypeAPI, getTypeAPI, addTypeAPI, putTypeAPI } from '@/api/modules/system/dictType';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { download } from '@/api';
+import { ILimitAPI, dictTableType, IdictDataType } from '@/type';
+import ColorBtn from '@/components/ColorBtn';
+import dayjs from 'dayjs';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import { hasPermi } from '@/utils/auth';
+import { pageDelJump } from '@/utils';
+
+const { RangePicker } = DatePicker;
 
 const DictType: React.FC = () => {
-  const { TextArea } = Input
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
+  const { TextArea } = Input;
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
 
   // 分页
-  const [queryParams, setQueryParams] = useState<ILimitAPI>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<ILimitAPI>({ pageNum: 1, pageSize: 10 });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as IdictDataType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as IdictDataType[] });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 非单个禁用
-  const [single, setSingle] = useState(true)
+  const [single, setSingle] = useState(true);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   //  table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 当前编辑的id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
   // 状态
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const res = await getDictsApi('sys_normal_disable')
-        setDictStatus(res.data.result)
+        const res = await getDictsApi('sys_normal_disable');
+        setDictStatus(res.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
+      const { data } = await getListAPI(queryParams);
 
-      setDataList({ ...data.result })
-      setLoading(false)
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let { createdAt, ...form } = queryForm.getFieldsValue()
+    // eslint-disable-next-line prefer-const
+    let { createdAt, ...form } = queryForm.getFieldsValue();
     if (createdAt) {
       form = {
         ...form,
         beginTime: dayjs(createdAt[0]).format('YYYY-MM-DD HH:mm:ss'),
         endTime: dayjs(createdAt[1]).format('YYYY-MM-DD HH:mm:ss'),
-      }
+      };
     }
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: dictTableType[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       if (!selectedRowKeys.length || selectedRowKeys.length > 1) {
-        setSingle(true)
+        setSingle(true);
       } else {
-        setSingle(false)
+        setSingle(false);
       }
-      setSelectKeys(selectedRowKeys)
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setRowKeys(selectedRowKeys.join(','))
+      setSelectKeys(selectedRowKeys);
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
   const handleEditForm = async (id: number) => {
-    const { data } = await getTypeAPI(id)
-    addEditForm.setFieldsValue(data.result as unknown as IdictType)
-    setCurrentId(id)
-    setIsModalOpen(true)
-    setIsAdd(false)
-  }
+    const { data } = await getTypeAPI(id);
+    addEditForm.setFieldsValue(data.result as unknown as IdictType);
+    setCurrentId(id);
+    setIsModalOpen(true);
+    setIsAdd(false);
+  };
 
   const handleFormFinish = async (values: IdictDataType) => {
     try {
       if (isAdd) {
-        const { data } = await addTypeAPI(values)
-        message.success(data.message)
+        const { data } = await addTypeAPI(values);
+        message.success(data.message);
       } else {
-        const { data } = await putTypeAPI({ ...values, dictId: currentId })
-        message.success(data.message)
+        const { data } = await putTypeAPI({ ...values, dictId: currentId });
+        message.success(data.message);
       }
-      addEditForm.resetFields()
-      getList()
-      setIsModalOpen(false)
+      addEditForm.resetFields();
+      getList();
+      setIsModalOpen(false);
     } catch (error) {}
-  }
+  };
 
-  //#region table
+  // #region table
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -171,18 +144,18 @@ const DictType: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除字典编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delTypeAPI(ids)
-          message.success(data.message)
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          const { data } = await delTypeAPI(ids);
+          message.success(data.message);
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // table columns
-  let columns = [
+  const columns = [
     {
       title: '字典编码',
       dataIndex: 'index',
@@ -234,32 +207,20 @@ const DictType: React.FC = () => {
       fixed: 'right',
       render: (_: any, record: IdictDataType) => (
         <div>
-          <Button
-            hidden={hasPermi('system:dict:edit')}
-            onClick={() => handleEditForm(record.dictId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:dict:edit')} onClick={() => handleEditForm(record.dictId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('system:dict:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(`${record.dictId}`)}
-          >
+          <Button hidden={hasPermi('system:dict:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(`${record.dictId}`)}>
             删除
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<dictTableType>
+  ] as ColumnsType<dictTableType>;
 
   // table 数据源
-  const tableData = dataList.rows
-  //#endregion
+  const tableData = dataList.rows;
+  // #endregion
 
   return (
     <div className="app-container">
@@ -267,20 +228,10 @@ const DictType: React.FC = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="字典名称" name="dictName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入字典名称"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入字典名称" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="字典类型" name="dictType">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入字典类型"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入字典类型" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item name="status" label="状态">
               <Select
@@ -315,32 +266,20 @@ const DictType: React.FC = () => {
                     hidden={hasPermi('system:dict:add')}
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setIsModalOpen(true)
-                      setIsAdd(true)
+                      setIsModalOpen(true);
+                      setIsAdd(true);
                     }}
                   >
                     新增
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:dict:edit')}
-                    disabled={single}
-                    color="success"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEditForm(Number(rowKeys))}
-                  >
+                  <ColorBtn hidden={hasPermi('system:dict:edit')} disabled={single} color="success" icon={<EditOutlined />} onClick={() => handleEditForm(Number(rowKeys))}>
                     修改
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:dict:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('system:dict:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
@@ -351,7 +290,7 @@ const DictType: React.FC = () => {
                     icon={<VerticalAlignBottomOutlined />}
                     onClick={() => {
                       try {
-                        download('/system/dictType/export')
+                        download('/system/dictType/export');
                       } catch (error) {}
                     }}
                   >
@@ -373,7 +312,7 @@ const DictType: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -384,8 +323,8 @@ const DictType: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
-                        setSelectKeys([])
+                        searchQueryFn();
+                        setSelectKeys([]);
                       }}
                     />
                   </Tooltip>
@@ -403,15 +342,7 @@ const DictType: React.FC = () => {
               size="middle"
               loading={loading}
             />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           {/* 添加 编辑 用户 */}
@@ -420,32 +351,17 @@ const DictType: React.FC = () => {
             open={isModalOpen}
             onOk={() => addEditForm.submit()}
             onCancel={() => {
-              setIsModalOpen(false)
-              addEditForm.resetFields()
+              setIsModalOpen(false);
+              addEditForm.resetFields();
             }}
             forceRender
           >
-            <Form
-              form={addEditForm}
-              labelCol={{ span: 6 }}
-              initialValues={{
-                status: '0',
-              }}
-              onFinish={handleFormFinish}
-            >
-              <Form.Item
-                label="字典名称"
-                name="dictName"
-                rules={[{ required: true, message: '请输入字典名称!' }]}
-              >
+            <Form form={addEditForm} labelCol={{ span: 6 }} initialValues={{ status: '0' }} onFinish={handleFormFinish}>
+              <Form.Item label="字典名称" name="dictName" rules={[{ required: true, message: '请输入字典名称!' }]}>
                 <Input placeholder="请输入字典名称" />
               </Form.Item>
 
-              <Form.Item
-                label="字典类型"
-                name="dictType"
-                rules={[{ required: true, message: '请输入字典类型!' }]}
-              >
+              <Form.Item label="字典类型" name="dictType" rules={[{ required: true, message: '请输入字典类型!' }]}>
                 <Input placeholder="请输入字典类型" />
               </Form.Item>
 
@@ -457,11 +373,7 @@ const DictType: React.FC = () => {
                   }))}
                 />
               </Form.Item>
-              <Form.Item
-                label="备注"
-                name="remark"
-                rules={[{ max: 200, message: '请输入内容(200字以内)!' }]}
-              >
+              <Form.Item label="备注" name="remark" rules={[{ max: 200, message: '请输入内容(200字以内)!' }]}>
                 <TextArea showCount placeholder="请输入内容(200字以内)" rows={3} />
               </Form.Item>
             </Form>
@@ -469,7 +381,7 @@ const DictType: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default DictType
+export default DictType;

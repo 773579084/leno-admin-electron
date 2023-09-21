@@ -1,7 +1,7 @@
-import ReactECharts from 'echarts-for-react'
+import ReactECharts from 'echarts-for-react';
 
 const Pie = (props: { data: { name: string; value: string }[] }) => {
-  const { data } = props
+  const { data } = props;
   const option = {
     tooltip: {
       trigger: 'item',
@@ -19,9 +19,9 @@ const Pie = (props: { data: { name: string; value: string }[] }) => {
         animationDuration: 1000,
       },
     ],
-  }
+  };
 
-  return <ReactECharts option={option} />
-}
+  return <ReactECharts option={option} />;
+};
 
-export default Pie
+export default Pie;

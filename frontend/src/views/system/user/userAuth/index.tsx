@@ -1,93 +1,91 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Form, Input, Col, Row, Table, Pagination, message } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
-import { putUserAuthAPI, getListAPI } from '@/api/modules/system/userAuth'
-import useStore from '@/store'
-import { toJS } from 'mobx'
-import { tbasType } from '@/type/modules/Layout'
-import { useNavigate, useParams } from 'react-router-dom'
-import { IroleType } from '@/type/modules/system/role'
-import classess from './index.module.scss'
-import { getUserInfoAPI } from '@/api/modules/system/user'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, Col, Row, Table, Pagination, message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { putUserAuthAPI, getListAPI } from '@/api/modules/system/userAuth';
+import useStore from '@/store';
+import { toJS } from 'mobx';
+import { tbasType } from '@/type/modules/Layout';
+import { useNavigate, useParams } from 'react-router-dom';
+import { IroleType } from '@/type/modules/system/role';
+import { getUserInfoAPI } from '@/api/modules/system/user';
+import classess from './index.module.scss';
 
 const LenoUser: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const { userId } = useParams()
+  const [queryForm] = Form.useForm();
+  const { userId } = useParams();
 
   const {
     useLayoutStore: { defaultObjMobx, changeTabsListMobx },
-  } = useStore()
-  const navigate = useNavigate()
+  } = useStore();
+  const navigate = useNavigate();
 
   // 分页
   const [queryParams, setQueryParams] = useState<IroleType>({
     pageNum: 1,
     pageSize: 10,
-  })
+  });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as IroleType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as IroleType[] });
 
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
 
   useEffect(() => {
     async function initInfo() {
       const {
         data: { result },
-      } = await getUserInfoAPI(userId as string)
-      queryForm.setFieldsValue(result)
-      setSelectKeys(result.roleIds as number[])
-      setLoading(false)
+      } = await getUserInfoAPI(userId as string);
+      queryForm.setFieldsValue(result);
+      setSelectKeys(result.roleIds as number[]);
+      setLoading(false);
     }
-    initInfo()
-  }, [])
+    initInfo();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
-      setDataList({ ...data.result })
-      setLoading(false)
+      const { data } = await getListAPI(queryParams);
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
 
   useEffect(() => {
-    getList()
-  }, [queryParams])
+    getList();
+  }, [queryParams]);
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: IroleType[]) => {
-      setSelectKeys(selectedRowKeys)
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectKeys(selectedRowKeys);
     },
-  }
+  };
 
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 关闭
   const closePage = () => {
-    const tabs = toJS(defaultObjMobx.tabsListMobx) as tbasType[]
-    changeTabsListMobx(
-      tabs.filter((tab) => tab.path.indexOf(`userAuth/${userId}` as string) === -1),
-    )
-    navigate('/system/user')
-  }
+    const tabs = toJS(defaultObjMobx.tabsListMobx) as tbasType[];
+    changeTabsListMobx(tabs.filter((tab) => tab.path.indexOf(`userAuth/${userId}` as string) === -1));
+    navigate('/system/user');
+  };
 
   // 提交
   const submitUserRole = async () => {
     const { data } = await putUserAuthAPI({
       userId: userId as string,
       roleIds: selectKeys,
-    })
-    message.success(data.message)
-    closePage()
-  }
+    });
+    message.success(data.message);
+    closePage();
+  };
 
   // table
   const columns = [
@@ -122,9 +120,9 @@ const LenoUser: React.FC = () => {
       key: 'createdAt',
       align: 'center',
     },
-  ] as ColumnsType<IroleType>
+  ] as ColumnsType<IroleType>;
   // table 数据源
-  const tableData = dataList.rows
+  const tableData = dataList.rows;
 
   return (
     <div className="app-container">
@@ -141,27 +139,11 @@ const LenoUser: React.FC = () => {
           </Form>
           <h3 className={classess['h4-title']}>角色信息</h3>
           <div className="leno-table">
-            <Table
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="roleId"
-              size="middle"
-              loading={loading}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} columns={columns} dataSource={tableData} pagination={false} rowKey="roleId" size="middle" loading={loading} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
         </Col>
-        <Row gutter={24} justify="center" style={{ width: 100 + '%', marginTop: 10 }}>
+        <Row gutter={24} justify="center" style={{ width: `${100}%`, marginTop: 10 }}>
           <Col>
             <Button onClick={submitUserRole} type="primary">
               提交
@@ -173,7 +155,7 @@ const LenoUser: React.FC = () => {
         </Row>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default LenoUser
+export default LenoUser;

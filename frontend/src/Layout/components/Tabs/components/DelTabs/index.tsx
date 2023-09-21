@@ -1,11 +1,11 @@
-import { Button, Dropdown } from 'antd'
-import type { MenuProps } from 'antd'
-import classes from './index.module.scss'
-import { CloseOutlined, CloseCircleOutlined } from '@ant-design/icons'
-import { useLocation } from 'react-router-dom'
+import { Button, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
+import { CloseOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { useLocation } from 'react-router-dom';
+import classes from './index.module.scss';
 
 const DelTabs = (props: any) => {
-  const { pathname } = useLocation()
+  const { pathname } = useLocation();
 
   // 下拉菜单
   const items: MenuProps['items'] = [
@@ -36,7 +36,7 @@ const DelTabs = (props: any) => {
         </div>
       ),
     },
-  ]
+  ];
 
   return (
     <div className={classes['tabs-del-tabs']}>
@@ -46,7 +46,7 @@ const DelTabs = (props: any) => {
         </Button>
       </Dropdown>
     </div>
-  )
-}
+  );
+};
 
-export default DelTabs
+export default DelTabs;

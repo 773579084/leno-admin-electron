@@ -89,4 +89,23 @@
     .ring3:after {
       transform-origin: 4px 37px;
       animation: rotation 1.2s infinite linear;
-    }</style><script defer="defer" src="./static/js/vendors.51af0496.js"></script><script defer="defer" src="./static/js/main.d77812b1.js"></script><link href="./static/css/vendors.85bffdb3.css" rel="stylesheet"><link href="./static/css/main.c55696a9.css" rel="stylesheet"></head><body><div id="root"><div class="loading-g"><div class="ring1"><div class="ring2"></div><div class="ring3"></div><div class="dot"></div></div><div class="laoding-font">Loading...</div></div></div></body></html>
+    }</style><script defer="defer" src="./static/js/vendors.28fee6ba.js"></script><script defer="defer" src="./static/js/main.7a55fa55.js"></script><link href="./static/css/vendors.b36e344a.css" rel="stylesheet"><link href="./static/css/main.b18ea1df.css" rel="stylesheet"></head><body><div id="root"><div class="loading-g"><div class="ring1"><div class="ring2"></div><div class="ring3"></div><div class="dot"></div></div><div class="laoding-font">Loading...</div></div></div></body><script>/* 此处代码用以解决 antdesign4.2*版本table组件使用了ResizeObserver会导致浏览器开发模式下报错 */
+  const debounce = (fn, delay) => {
+    let timer = null;
+    return function () {
+      let context = this;
+      let args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fn.apply(context, args);
+      }, delay);
+    }
+  }
+
+  const _ResizeObserver = window.ResizeObserver;
+  window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
+    constructor(callback) {
+      callback = debounce(callback, 16);
+      super(callback);
+    }
+  }</script></html>

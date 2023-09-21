@@ -1,36 +1,36 @@
-import { useEffect, useState } from 'react'
-import classes from './index.module.scss'
-import { Card, Row, Col } from 'antd'
-import { DashboardOutlined, DesktopOutlined, PieChartOutlined } from '@ant-design/icons'
-import { getCacheMonitorAPI } from '@/api/modules/monitor/cache'
-import useStore from '@/store'
-import Pie from './components/Pie'
-import TableDisc from './components/TableDisc'
-import { ICacheMonitoType, Info } from '@/type/modules/monitor/cache'
+import { useEffect, useState } from 'react';
+import { Card, Row, Col } from 'antd';
+import { DashboardOutlined, DesktopOutlined, PieChartOutlined } from '@ant-design/icons';
+import { getCacheMonitorAPI } from '@/api/modules/monitor/cache';
+import useStore from '@/store';
+import { ICacheMonitoType, Info } from '@/type/modules/monitor/cache';
+import Pie from './components/Pie';
+import TableDisc from './components/TableDisc';
+import classes from './index.module.scss';
 
 const Cache = () => {
-  const [info, setInfo] = useState<ICacheMonitoType>()
+  const [info, setInfo] = useState<ICacheMonitoType>();
   const {
     useGlobalStore: { changeIsContentLoading },
-  } = useStore()
+  } = useStore();
 
   useEffect(() => {
-    changeIsContentLoading(true)
+    changeIsContentLoading(true);
     async function init() {
       try {
         const {
           data: { result },
-        } = await getCacheMonitorAPI()
+        } = await getCacheMonitorAPI();
 
-        setInfo(result)
-        changeIsContentLoading(false)
+        setInfo(result);
+        changeIsContentLoading(false);
       } catch (error) {
-        console.error(error)
-        changeIsContentLoading(false)
+        console.error(error);
+        changeIsContentLoading(false);
       }
     }
-    init()
-  }, [])
+    init();
+  }, []);
 
   return (
     <div className="app-container">
@@ -136,9 +136,7 @@ const Cache = () => {
                 </div>
               }
             >
-              <div className={classes['echarts']}>
-                {info?.commandStats ? <Pie data={info.commandStats} /> : ''}
-              </div>
+              <div className={classes.echarts}>{info?.commandStats ? <Pie data={info.commandStats} /> : ''}</div>
             </Card>
           </Col>
           <Col span={12}>
@@ -149,15 +147,13 @@ const Cache = () => {
                 </div>
               }
             >
-              <div className={classes['echarts']}>
-                {info?.info ? <TableDisc data={info?.info as Info} /> : ''}
-              </div>
+              <div className={classes.echarts}>{info?.info ? <TableDisc data={info?.info as Info} /> : ''}</div>
             </Card>
           </Col>
         </Row>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cache
+export default Cache;

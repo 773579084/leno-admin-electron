@@ -1,51 +1,40 @@
-import React, { useState, useEffect } from 'react'
-import { Form, Input, Select, Col, Checkbox, Row, Table, Tabs, message } from 'antd'
-import { ArrowUpOutlined } from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getOptionselectAPI } from '@/api/modules/system/dictType'
-import { IdictDataType, tbasType } from '@/type'
-import ColorBtn from '@/components/ColorBtn'
-import GenerateMes from './component/GenerateMes'
-import { CheckboxChangeEvent } from 'antd/lib/checkbox'
-import BaseMes from './component/BaseMes'
-import { ColumnType, GenType } from '@/type/modules/tool/gen'
-import { useNavigate, useParams } from 'react-router-dom'
-import { getSqlListAPI, putTableAPI } from '@/api/modules/tool/gen'
-import { toJS } from 'mobx'
-import useStore from '@/store'
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Select, Col, Checkbox, Row, Table, Tabs, message } from 'antd';
+import { ArrowUpOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getOptionselectAPI } from '@/api/modules/system/dictType';
+import { IdictDataType, tbasType } from '@/type';
+import ColorBtn from '@/components/ColorBtn';
+import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import { ColumnType, GenType } from '@/type/modules/tool/gen';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getSqlListAPI, putTableAPI } from '@/api/modules/tool/gen';
+import { toJS } from 'mobx';
+import useStore from '@/store';
+import BaseMes from './component/BaseMes';
+import GenerateMes from './component/GenerateMes';
 
 const GenEdit: React.FC = () => {
-  const [baseForm] = Form.useForm()
-  const [generateForm] = Form.useForm()
-  const { tableId } = useParams()
-  const navigate = useNavigate()
+  const [baseForm] = Form.useForm();
+  const [generateForm] = Form.useForm();
+  const { tableId } = useParams();
+  const navigate = useNavigate();
   const {
     useLayoutStore: { defaultObjMobx, changeTabsListMobx },
-  } = useStore()
+  } = useStore();
 
   // 当前列表数据
-  const [dataList, setDataList] = useState<ColumnType[]>([])
+  const [dataList, setDataList] = useState<ColumnType[]>([]);
   // 当前table基础数据
-  const [currentTable, setCurrentTable] = useState<GenType>()
+  const [currentTable, setCurrentTable] = useState<GenType>();
   // table及字段数据
-  const [tableList, setTableList] = useState<GenType[]>([])
+  const [tableList, setTableList] = useState<GenType[]>([]);
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 保存 dictType select
-  const [optionselect, setOptionselect] = useState<IdictDataType[]>([])
+  const [optionselect, setOptionselect] = useState<IdictDataType[]>([]);
   // tabs key
-  const [tabsKey, setTabskey] = useState('2')
-
-  useEffect(() => {
-    const getDictsFn = async () => {
-      try {
-        const { data } = await getOptionselectAPI()
-        setOptionselect(data.result)
-      } catch (error) {}
-    }
-    getDictsFn()
-    getList()
-  }, [])
+  const [tabsKey, setTabskey] = useState('2');
 
   // 查询列表
   const getList = async () => {
@@ -54,21 +43,32 @@ const GenEdit: React.FC = () => {
         data: {
           result: { rows },
         },
-      } = await getSqlListAPI()
-      setTableList(rows)
+      } = await getSqlListAPI();
+      setTableList(rows);
 
-      const Gen = rows.find((row) => row.tableId === Number(tableId))
-      setCurrentTable(Gen)
-      setDataList(Gen?.columns as ColumnType[])
-      setLoading(false)
+      const Gen = rows.find((row) => row.tableId === Number(tableId));
+      setCurrentTable(Gen);
+      setDataList(Gen?.columns as ColumnType[]);
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+
+  useEffect(() => {
+    const getDictsFn = async () => {
+      try {
+        const { data } = await getOptionselectAPI();
+        setOptionselect(data.result);
+      } catch (error) {}
+    };
+    getDictsFn();
+    getList();
+  }, []);
 
   // 提交
   const handleSubmitForm = async () => {
-    let submitData = {} as any
+    let submitData = {} as any;
     // 获取 字段信息 data
-    submitData['columns'] = dataList
+    submitData.columns = dataList;
     // 获取基本信息
 
     baseForm
@@ -77,7 +77,7 @@ const GenEdit: React.FC = () => {
         submitData = {
           ...submitData,
           ...baseForm.getFieldsValue(),
-        }
+        };
 
         generateForm
           .validateFields()
@@ -86,36 +86,34 @@ const GenEdit: React.FC = () => {
               tableId,
               ...submitData,
               ...generateForm.getFieldsValue(),
-            }
-            const { data } = await putTableAPI(submitData)
-            message.success(data.message)
-            const tabs = toJS(defaultObjMobx.tabsListMobx) as tbasType[]
-            changeTabsListMobx(
-              tabs.filter((tab) => tab.path.indexOf(`genEdit/${tableId}` as string) === -1),
-            )
-            navigate('/tool/gen')
+            };
+            const { data } = await putTableAPI(submitData);
+            message.success(data.message);
+            const tabs = toJS(defaultObjMobx.tabsListMobx) as tbasType[];
+            changeTabsListMobx(tabs.filter((tab) => tab.path.indexOf(`genEdit/${tableId}` as string) === -1));
+            navigate('/tool/gen');
           })
           .catch(() => {
-            setTabskey('3')
-          })
+            setTabskey('3');
+          });
       })
       .catch(() => {
-        setTabskey('1')
-      })
-  }
+        setTabskey('1');
+      });
+  };
 
-  //#region table
+  // #region table
   const tableTwoWayFn = (value: string, index: number, className: string) => {
-    const newDataList = JSON.parse(JSON.stringify(dataList))
-    newDataList[index][className] = value
-    setDataList(newDataList)
-  }
+    const newDataList = JSON.parse(JSON.stringify(dataList));
+    newDataList[index][className] = value;
+    setDataList(newDataList);
+  };
 
   const onRadioFn = (e: CheckboxChangeEvent, index: number, className: string) => {
-    const newDataList = JSON.parse(JSON.stringify(dataList))
-    newDataList[index][className] = e.target.checked ? '0' : '1'
-    setDataList(newDataList)
-  }
+    const newDataList = JSON.parse(JSON.stringify(dataList));
+    newDataList[index][className] = e.target.checked ? '0' : '1';
+    setDataList(newDataList);
+  };
 
   // table columns
   const htmlTypeOption = [
@@ -155,7 +153,7 @@ const GenEdit: React.FC = () => {
       value: 'editor',
       label: '富文本控件',
     },
-  ]
+  ];
   const queryTypeOption = [
     {
       value: 'eq',
@@ -189,7 +187,7 @@ const GenEdit: React.FC = () => {
       value: 'between',
       label: 'BETWEEN',
     },
-  ]
+  ];
   const tsTypeOption = [
     {
       value: 'string',
@@ -207,7 +205,7 @@ const GenEdit: React.FC = () => {
       value: 'boolean',
       label: 'Boolean',
     },
-  ]
+  ];
   const columns = [
     {
       title: '序号',
@@ -227,7 +225,7 @@ const GenEdit: React.FC = () => {
         <Input
           value={text}
           onChange={(e) => {
-            tableTwoWayFn(e.target.value, index, 'columnName')
+            tableTwoWayFn(e.target.value, index, 'columnName');
           }}
         />
       ),
@@ -242,7 +240,7 @@ const GenEdit: React.FC = () => {
         <Input
           value={text}
           onChange={(e) => {
-            tableTwoWayFn(e.target.value, index, 'columnComment')
+            tableTwoWayFn(e.target.value, index, 'columnComment');
           }}
         />
       ),
@@ -263,7 +261,7 @@ const GenEdit: React.FC = () => {
           style={{ width: 120 }}
           value={text}
           onChange={(value) => {
-            tableTwoWayFn(value, index, 'tsType')
+            tableTwoWayFn(value, index, 'tsType');
           }}
           options={tsTypeOption}
         />
@@ -278,7 +276,7 @@ const GenEdit: React.FC = () => {
       render: (text, record, index) => (
         <Input
           onChange={(e) => {
-            tableTwoWayFn(e.target.value, index, 'tsField')
+            tableTwoWayFn(e.target.value, index, 'tsField');
           }}
           value={text}
         />
@@ -290,9 +288,7 @@ const GenEdit: React.FC = () => {
       key: 'isInsert',
       align: 'center',
       width: '5%',
-      render: (text, record, index) => (
-        <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isInsert')} />
-      ),
+      render: (text, record, index) => <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isInsert')} />,
     },
     {
       title: '编辑',
@@ -300,9 +296,7 @@ const GenEdit: React.FC = () => {
       key: 'isEdit',
       align: 'center',
       width: '5%',
-      render: (text, record, index) => (
-        <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isEdit')} />
-      ),
+      render: (text, record, index) => <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isEdit')} />,
     },
     {
       title: '列表',
@@ -310,9 +304,7 @@ const GenEdit: React.FC = () => {
       key: 'isList',
       align: 'center',
       width: '5%',
-      render: (text, record, index) => (
-        <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isList')} />
-      ),
+      render: (text, record, index) => <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isList')} />,
     },
     {
       title: '查询',
@@ -320,9 +312,7 @@ const GenEdit: React.FC = () => {
       key: 'isQuery',
       align: 'center',
       width: '5%',
-      render: (text, record, index) => (
-        <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isQuery')} />
-      ),
+      render: (text, record, index) => <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isQuery')} />,
     },
     {
       title: '查询方式',
@@ -334,7 +324,7 @@ const GenEdit: React.FC = () => {
           style={{ width: 120 }}
           value={text}
           onChange={(value) => {
-            tableTwoWayFn(value, index, 'queryType')
+            tableTwoWayFn(value, index, 'queryType');
           }}
           options={queryTypeOption}
         />
@@ -346,9 +336,7 @@ const GenEdit: React.FC = () => {
       key: 'isRequired',
       align: 'center',
       width: '5%',
-      render: (text, record, index) => (
-        <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isRequired')} />
-      ),
+      render: (text, record, index) => <Checkbox checked={text === '0'} onChange={(e) => onRadioFn(e, index, 'isRequired')} />,
     },
     {
       title: '显示类型',
@@ -360,7 +348,7 @@ const GenEdit: React.FC = () => {
           style={{ width: 120 }}
           value={text}
           onChange={(value) => {
-            tableTwoWayFn(value, index, 'htmlType')
+            tableTwoWayFn(value, index, 'htmlType');
           }}
           options={htmlTypeOption}
         />
@@ -378,19 +366,19 @@ const GenEdit: React.FC = () => {
           placeholder="字典类型"
           value={text}
           onChange={(value) => {
-            tableTwoWayFn(value ? value : '', index, 'dictType')
+            tableTwoWayFn(value || '', index, 'dictType');
           }}
           options={optionselect.map((item) => ({
             value: item.dictType,
-            label: item.dictName + ` ${item.dictType}`,
+            label: `${item.dictName} ${item.dictType}`,
           }))}
         />
       ),
     },
-  ] as ColumnsType<ColumnType>
+  ] as ColumnsType<ColumnType>;
 
   // table 数据源
-  const tableData = dataList
+  const tableData = dataList;
 
   const rightBtn = (
     <Row gutter={8}>
@@ -400,21 +388,14 @@ const GenEdit: React.FC = () => {
         </ColorBtn>
       </Col>
     </Row>
-  )
+  );
 
   // 字段信息
   const fieldMes = (
     <div className="leno-table">
-      <Table
-        columns={columns}
-        dataSource={tableData}
-        pagination={false}
-        rowKey="columnId"
-        size="middle"
-        loading={loading}
-      />
+      <Table columns={columns} dataSource={tableData} pagination={false} rowKey="columnId" size="middle" loading={loading} />
     </div>
-  )
+  );
 
   return (
     <div className="app-container">
@@ -424,7 +405,7 @@ const GenEdit: React.FC = () => {
             activeKey={tabsKey}
             tabBarExtraContent={rightBtn}
             onTabClick={(key: string) => {
-              setTabskey(key)
+              setTabskey(key);
             }}
             items={[
               {
@@ -441,14 +422,7 @@ const GenEdit: React.FC = () => {
               {
                 label: '生成信息',
                 key: '3',
-                children: (
-                  <GenerateMes
-                    generateForm={generateForm}
-                    columns={dataList}
-                    tableList={tableList}
-                    currentTable={currentTable as GenType}
-                  />
-                ),
+                children: <GenerateMes generateForm={generateForm} columns={dataList} tableList={tableList} currentTable={currentTable as GenType} />,
                 forceRender: true,
               },
             ]}
@@ -456,7 +430,7 @@ const GenEdit: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default GenEdit
+export default GenEdit;

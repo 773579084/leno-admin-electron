@@ -16,7 +16,7 @@ module.exports = merge(baseConfig, {
     host: '0.0.0.0', // host 配置 0.0.0.0 同域网络下其他主机可以访问开发环境项目
     port: port, // 服务端口号
     hot: true,
-    open: false, // 编译完是否打开页面
+    open: true, // 编译完是否打开页面
     compress: false, // gzip压缩，开发环境不开启，提升速度
     historyApiFallback: true,// 支持 history 路由重定向到 index.html 文件
     headers: {

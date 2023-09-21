@@ -1,98 +1,77 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  Radio,
-  message,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-  VerticalAlignBottomOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/config'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { download } from '@/api'
-import { IconfigDetailType, IconfigType } from '@/type/modules/system/config'
-const { RangePicker } = DatePicker
-import ColorBtn from '@/components/ColorBtn'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import dayjs from 'dayjs'
-import { hasPermi } from '@/utils/auth'
-import { pageDelJump } from '@/utils'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, Select, DatePicker, Col, Row, Tooltip, Table, Pagination, Modal, Radio, message } from 'antd';
+import { SyncOutlined, SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI } from '@/api/modules/system/config';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { download } from '@/api';
+import { IconfigDetailType, IconfigType } from '@/type/modules/system/config';
+import ColorBtn from '@/components/ColorBtn';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import dayjs from 'dayjs';
+import { hasPermi } from '@/utils/auth';
+import { pageDelJump } from '@/utils';
+
+const { RangePicker } = DatePicker;
 
 const SysConfig: React.FC = () => {
-  const { TextArea } = Input
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
+  const { TextArea } = Input;
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
 
   // 分页
-  const [queryParams, setQueryParams] = useState<IconfigType>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<IconfigType>({ pageNum: 1, pageSize: 10 });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as IconfigDetailType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as IconfigDetailType[] });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 非单个禁用
-  const [single, setSingle] = useState(true)
+  const [single, setSingle] = useState(true);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   //  table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 当前编辑的id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
 
-  const [dictConfigType, setDictConfigType] = useState<IdictType[]>([])
+  const [dictConfigType, setDictConfigType] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const sys_yes_no = await getDictsApi('sys_yes_no')
-        setDictConfigType(sys_yes_no.data.result)
+        const sys_yes_no = await getDictsApi('sys_yes_no');
+        setDictConfigType(sys_yes_no.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
-      setDataList({ ...data.result })
-      setLoading(false)
+      const { data } = await getListAPI(queryParams);
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let { createdAt, ...form } = queryForm.getFieldsValue()
+    // eslint-disable-next-line prefer-const
+    let { createdAt, ...form } = queryForm.getFieldsValue();
     if (createdAt) {
       form = {
         ...form,
@@ -100,69 +79,69 @@ const SysConfig: React.FC = () => {
           beginTime: dayjs(createdAt[0]).format('YYYY-MM-DD HH:mm:ss'),
           endTime: dayjs(createdAt[1]).format('YYYY-MM-DD HH:mm:ss'),
         },
-      }
+      };
     }
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   // 重置
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: IconfigDetailType[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       if (!selectedRowKeys.length || selectedRowKeys.length > 1) {
-        setSingle(true)
+        setSingle(true);
       } else {
-        setSingle(false)
+        setSingle(false);
       }
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setSelectKeys(selectedRowKeys)
-      setRowKeys(selectedRowKeys.join(','))
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setSelectKeys(selectedRowKeys);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
   // 获取详情
   const handleEditForm = async (id: number) => {
     try {
-      const { data } = await getDetailAPI(id)
-      setCurrentId(id)
-      setIsModalOpen(true)
-      setIsAdd(false)
-      addEditForm.setFieldsValue(data.result as unknown as IconfigType)
+      const { data } = await getDetailAPI(id);
+      setCurrentId(id);
+      setIsModalOpen(true);
+      setIsAdd(false);
+      addEditForm.setFieldsValue(data.result as unknown as IconfigType);
     } catch (error) {}
-  }
+  };
 
   // 表单提交
   const handleFormFinish = async (values: IconfigType) => {
     try {
       if (isAdd) {
-        const { data } = await addAPI(values)
-        message.success(data.message)
+        const { data } = await addAPI(values);
+        message.success(data.message);
       } else {
-        const { data } = await putAPI({ ...values, configId: currentId })
-        message.success(data.message)
+        const { data } = await putAPI({ ...values, configId: currentId });
+        message.success(data.message);
       }
     } catch (error) {}
 
-    addEditForm.resetFields()
-    getList()
-    setIsModalOpen(false)
-  }
+    addEditForm.resetFields();
+    getList();
+    setIsModalOpen(false);
+  };
 
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -170,18 +149,18 @@ const SysConfig: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // table
-  let columns = [
+  const columns = [
     {
       title: '编码',
       dataIndex: 'index',
@@ -194,9 +173,7 @@ const SysConfig: React.FC = () => {
       dataIndex: 'configName',
       key: 'configName',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -208,9 +185,7 @@ const SysConfig: React.FC = () => {
       dataIndex: 'configKey',
       key: 'configKey',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -241,9 +216,7 @@ const SysConfig: React.FC = () => {
       dataIndex: 'remark',
       key: 'remark',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -258,31 +231,19 @@ const SysConfig: React.FC = () => {
       width: 150,
       render: (_: any, record: IconfigType) => (
         <div>
-          <Button
-            hidden={hasPermi('system:config:edit')}
-            onClick={() => handleEditForm(record.configId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('system:config:edit')} onClick={() => handleEditForm(record.configId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('system:config:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(String(record.configId))}
-          >
+          <Button hidden={hasPermi('system:config:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(String(record.configId))}>
             删除
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<IconfigDetailType>
+  ] as ColumnsType<IconfigDetailType>;
 
   // table 数据源
-  const tableData = dataList.rows
+  const tableData = dataList.rows;
 
   return (
     <div className="app-container">
@@ -290,20 +251,10 @@ const SysConfig: React.FC = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="参数名称" name="configName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入参数名称"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入参数名称" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="参数键名" name="configKey">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入参数键名"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入参数键名" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item name="configType" label="系统内置">
               <Select
@@ -339,32 +290,20 @@ const SysConfig: React.FC = () => {
                     hidden={hasPermi('system:config:add')}
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setIsModalOpen(true)
-                      setIsAdd(true)
+                      setIsModalOpen(true);
+                      setIsAdd(true);
                     }}
                   >
                     新增
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:config:edit')}
-                    disabled={single}
-                    color="success"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEditForm(Number(rowKeys))}
-                  >
+                  <ColorBtn hidden={hasPermi('system:config:edit')} disabled={single} color="success" icon={<EditOutlined />} onClick={() => handleEditForm(Number(rowKeys))}>
                     修改
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('system:config:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('system:config:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
@@ -375,7 +314,7 @@ const SysConfig: React.FC = () => {
                     icon={<VerticalAlignBottomOutlined />}
                     onClick={() => {
                       try {
-                        download('/system/config/export')
+                        download('/system/config/export');
                       } catch (error) {}
                     }}
                   >
@@ -392,7 +331,7 @@ const SysConfig: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -403,8 +342,8 @@ const SysConfig: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
-                        setSelectKeys([])
+                        searchQueryFn();
+                        setSelectKeys([]);
                       }}
                     />
                   </Tooltip>
@@ -413,24 +352,8 @@ const SysConfig: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="configId"
-              size="middle"
-              loading={loading}
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="configId" size="middle" loading={loading} rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           {/* 添加 编辑 用户 */}
@@ -439,40 +362,18 @@ const SysConfig: React.FC = () => {
             open={isModalOpen}
             onOk={() => addEditForm.submit()}
             onCancel={() => {
-              setIsModalOpen(false)
-              addEditForm.resetFields()
+              setIsModalOpen(false);
+              addEditForm.resetFields();
             }}
           >
-            <Form
-              form={addEditForm}
-              labelCol={{ span: 5 }}
-              onFinish={handleFormFinish}
-              initialValues={{
-                configType: 'Y',
-              }}
-            >
-              <Form.Item
-                label="参数名称"
-                name="configName"
-                hidden={false}
-                rules={[{ required: true, message: '请输入参数名称!' }]}
-              >
+            <Form form={addEditForm} labelCol={{ span: 5 }} onFinish={handleFormFinish} initialValues={{ configType: 'Y' }}>
+              <Form.Item label="参数名称" name="configName" hidden={false} rules={[{ required: true, message: '请输入参数名称!' }]}>
                 <Input placeholder="请输入参数名称" />
               </Form.Item>
-              <Form.Item
-                label="参数键名"
-                name="configKey"
-                hidden={false}
-                rules={[{ required: true, message: '请输入参数键名!' }]}
-              >
+              <Form.Item label="参数键名" name="configKey" hidden={false} rules={[{ required: true, message: '请输入参数键名!' }]}>
                 <Input placeholder="请输入参数键名" />
               </Form.Item>
-              <Form.Item
-                label="参数键值"
-                name="configValue"
-                hidden={false}
-                rules={[{ required: true, message: '请输入参数键值!' }]}
-              >
+              <Form.Item label="参数键值" name="configValue" hidden={false} rules={[{ required: true, message: '请输入参数键值!' }]}>
                 <Input placeholder="请输入参数键值" />
               </Form.Item>
               <Form.Item label="系统内置" name="configType">
@@ -483,11 +384,7 @@ const SysConfig: React.FC = () => {
                   }))}
                 />
               </Form.Item>
-              <Form.Item
-                label="备注"
-                name="remark"
-                rules={[{ max: 200, message: '请输入内容(200字以内)!' }]}
-              >
+              <Form.Item label="备注" name="remark" rules={[{ max: 200, message: '请输入内容(200字以内)!' }]}>
                 <TextArea showCount placeholder="请输入内容(200字以内)" />
               </Form.Item>
             </Form>
@@ -495,7 +392,7 @@ const SysConfig: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default SysConfig
+export default SysConfig;

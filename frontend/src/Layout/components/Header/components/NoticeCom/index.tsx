@@ -1,26 +1,26 @@
-import { Badge, Popover, Tabs } from 'antd'
-import { useEffect, useState } from 'react'
-import { NotificationOutlined } from '@ant-design/icons'
-import classes from './index.module.scss'
-import useStore from '@/store'
-import { observer } from 'mobx-react-lite'
-import { toJS } from 'mobx'
-import { Empty } from 'antd'
+/* eslint-disable array-callback-return */
+import { Badge, Popover, Tabs, Empty } from 'antd';
+import { useEffect, useState } from 'react';
+import { NotificationOutlined } from '@ant-design/icons';
+import useStore from '@/store';
+import { observer } from 'mobx-react-lite';
+import { toJS } from 'mobx';
+import classes from './index.module.scss';
 
 const NoticeCom = () => {
-  const [show, setShow] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [show, setShow] = useState(false);
+  const [open, setOpen] = useState(false);
   const {
     useSocketStore: { notices },
-  } = useStore()
+  } = useStore();
 
   const handleOpenChange = (newOpen: boolean) => {
-    setOpen(newOpen)
-  }
+    setOpen(newOpen);
+  };
 
   useEffect(() => {
-    toJS(notices).length > 0 ? setShow(true) : setShow(false)
-  }, [notices])
+    toJS(notices).length > 0 ? setShow(true) : setShow(false);
+  }, [notices]);
 
   const noticeDiv = (
     <div className={classes['notice-div']}>
@@ -38,12 +38,9 @@ const NoticeCom = () => {
                       return (
                         <div key={item.noticeId}>
                           <h4>{item.noticeTitle}</h4>
-                          <div
-                            className={classes['notice-content']}
-                            dangerouslySetInnerHTML={{ __html: item.noticeContent as string }}
-                          />
+                          <div className={classes['notice-content']} dangerouslySetInnerHTML={{ __html: item.noticeContent as string }} />
                         </div>
-                      )
+                      );
                     }
                   })
                 ) : (
@@ -63,12 +60,9 @@ const NoticeCom = () => {
                       return (
                         <div key={item.noticeId}>
                           <h4>{item.noticeTitle}</h4>
-                          <div
-                            className={classes['notice-content']}
-                            dangerouslySetInnerHTML={{ __html: item.noticeContent as string }}
-                          />
+                          <div className={classes['notice-content']} dangerouslySetInnerHTML={{ __html: item.noticeContent as string }} />
                         </div>
-                      )
+                      );
                     }
                   })
                 ) : (
@@ -80,7 +74,7 @@ const NoticeCom = () => {
         ]}
       />
     </div>
-  )
+  );
 
   return (
     <Popover content={noticeDiv} trigger="click" open={open} onOpenChange={handleOpenChange}>
@@ -88,7 +82,7 @@ const NoticeCom = () => {
         <NotificationOutlined style={{ fontSize: 18, cursor: 'pointer' }} />
       </Badge>
     </Popover>
-  )
-}
+  );
+};
 
-export default observer(NoticeCom)
+export default observer(NoticeCom);

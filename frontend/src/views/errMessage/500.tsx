@@ -1,9 +1,9 @@
-import { Result, Button } from 'antd'
-import { useNavigate } from 'react-router-dom'
-import { HOME_URL } from '@/config/config'
+import { Result, Button } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { HOME_URL } from '@/config/config';
 
 const NotNetwork = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <div className="app-container">
       <Result
@@ -17,6 +17,6 @@ const NotNetwork = () => {
         }
       />
     </div>
-  )
-}
-export default NotNetwork
+  );
+};
+export default NotNetwork;

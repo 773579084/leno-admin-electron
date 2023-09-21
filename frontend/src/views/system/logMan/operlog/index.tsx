@@ -1,94 +1,75 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  DatePicker,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  message,
-} from 'antd'
-import {
-  SyncOutlined,
-  SearchOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ExclamationCircleOutlined,
-  VerticalAlignBottomOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import { getListAPI, delAPI, getDetailAPI, cleanAPI } from '@/api/modules/system/operlog'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { download } from '@/api'
-import { IoperlogDetailType, IoperlogType } from '@/type/modules/system/operlog'
-const { RangePicker } = DatePicker
-import ColorBtn from '@/components/ColorBtn'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import dayjs from 'dayjs'
-import { hasPermi } from '@/utils/auth'
-import { pageDelJump } from '@/utils'
+import React, { useState, useEffect } from 'react';
+import { Button, Form, Input, Select, DatePicker, Col, Row, Tooltip, Table, Pagination, Modal, message } from 'antd';
+import { SyncOutlined, SearchOutlined, EditOutlined, DeleteOutlined, ExclamationCircleOutlined, VerticalAlignBottomOutlined } from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delAPI, getDetailAPI, cleanAPI } from '@/api/modules/system/operlog';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { download } from '@/api';
+import { IoperlogDetailType, IoperlogType } from '@/type/modules/system/operlog';
+import ColorBtn from '@/components/ColorBtn';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import dayjs from 'dayjs';
+import { hasPermi } from '@/utils/auth';
+import { pageDelJump } from '@/utils';
+
+const { RangePicker } = DatePicker;
 
 const SysOperLog: React.FC = () => {
-  const [queryForm] = Form.useForm()
-  const { confirm } = Modal
+  const [queryForm] = Form.useForm();
+  const { confirm } = Modal;
 
   // 分页
-  const [queryParams, setQueryParams] = useState<IoperlogType>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<IoperlogType>({ pageNum: 1, pageSize: 10 });
   // 列表数据
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as IoperlogType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as IoperlogType[] });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   //  table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 详情数据
-  const [detailData, setDetailData] = useState<IoperlogDetailType>({})
+  const [detailData, setDetailData] = useState<IoperlogDetailType>({});
 
-  const [dictBusinessType, setDictBusinessType] = useState<IdictType[]>([])
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
+  const [dictBusinessType, setDictBusinessType] = useState<IdictType[]>([]);
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const sys_oper_type = await getDictsApi('sys_oper_type')
-        setDictBusinessType(sys_oper_type.data.result)
-        const sys_common_status = await getDictsApi('sys_common_status')
-        setDictStatus(sys_common_status.data.result)
+        const sys_oper_type = await getDictsApi('sys_oper_type');
+        setDictBusinessType(sys_oper_type.data.result);
+        const sys_common_status = await getDictsApi('sys_common_status');
+        setDictStatus(sys_common_status.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
+      const { data } = await getListAPI(queryParams);
 
-      setDataList({ ...data.result })
-      setLoading(false)
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let { operTime, ...form } = queryForm.getFieldsValue()
+    // eslint-disable-next-line prefer-const
+    let { operTime, ...form } = queryForm.getFieldsValue();
     if (operTime) {
       form = {
         ...form,
@@ -96,50 +77,48 @@ const SysOperLog: React.FC = () => {
           beginTime: dayjs(operTime[0]).format('YYYY-MM-DD HH:mm:ss'),
           endTime: dayjs(operTime[1]).format('YYYY-MM-DD HH:mm:ss'),
         },
-      }
+      };
     }
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   // 类型转换
-  const dictToggle = (dictValue: string, dict: IdictType[]) => {
-    return dict.find((item) => item.dictValue === dictValue)?.dictLabel
-  }
+  const dictToggle = (dictValue: string, dict: IdictType[]) => dict.find((item) => item.dictValue === dictValue)?.dictLabel;
 
   // 重置
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
-    onChange: (selectedRowKeys: React.Key[], selectedRows: IoperlogType[]) => {
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setSelectKeys(selectedRowKeys)
-      setRowKeys(selectedRowKeys.join(','))
+    onChange: (selectedRowKeys: React.Key[]) => {
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setSelectKeys(selectedRowKeys);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
   // 获取详情
   const handleEditForm = async (id: number) => {
     try {
-      const { data } = await getDetailAPI(id)
-      setDetailData(data.result)
-      setIsModalOpen(true)
+      const { data } = await getDetailAPI(id);
+      setDetailData(data.result);
+      setIsModalOpen(true);
     } catch (error) {}
-  }
+  };
 
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -147,15 +126,15 @@ const SysOperLog: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 清空操作日志
   const delAllFn = () => {
@@ -163,18 +142,18 @@ const SysOperLog: React.FC = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认清空所有操作日志数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await cleanAPI()
-          message.success(data.message)
-          getList()
+          const { data } = await cleanAPI();
+          message.success(data.message);
+          getList();
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // table
-  let columns = [
+  const columns = [
     {
       title: '日志主键',
       dataIndex: 'operId',
@@ -186,9 +165,7 @@ const SysOperLog: React.FC = () => {
       dataIndex: 'title',
       key: 'title',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -219,9 +196,7 @@ const SysOperLog: React.FC = () => {
       dataIndex: 'operLocation',
       key: 'operLocation',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -240,9 +215,7 @@ const SysOperLog: React.FC = () => {
       dataIndex: 'operTime',
       key: 'operTime',
       align: 'center',
-      ellipsis: {
-        showTitle: false,
-      },
+      ellipsis: { showTitle: false },
       render: (address) => (
         <Tooltip placement="topLeft" title={address}>
           {address}
@@ -256,21 +229,16 @@ const SysOperLog: React.FC = () => {
       fixed: 'right',
       render: (_: any, record: IoperlogType) => (
         <div>
-          <Button
-            onClick={() => handleEditForm(record.operId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button onClick={() => handleEditForm(record.operId as number)} size="small" icon={<EditOutlined />} type="link">
             详情
           </Button>
         </div>
       ),
     },
-  ] as ColumnsType<IoperlogType>
+  ] as ColumnsType<IoperlogType>;
 
   // table 数据源
-  const tableData = dataList.rows
+  const tableData = dataList.rows;
 
   return (
     <div className="app-container">
@@ -278,20 +246,10 @@ const SysOperLog: React.FC = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="系统模块" name="title">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入系统模块"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入系统模块" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item label="操作人员" name="operName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入操作人员"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入操作人员" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item name="businessType" label="类型">
               <Select
@@ -334,23 +292,12 @@ const SysOperLog: React.FC = () => {
             <Col span={16} className="leno-btn">
               <Row gutter={8}>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('monitor:operlog:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('monitor:operlog:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('monitor:operlog:remove')}
-                    onClick={delAllFn}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('monitor:operlog:remove')} onClick={delAllFn} color="danger" icon={<DeleteOutlined />}>
                     清空
                   </ColorBtn>
                 </Col>
@@ -361,7 +308,7 @@ const SysOperLog: React.FC = () => {
                     icon={<VerticalAlignBottomOutlined />}
                     onClick={() => {
                       try {
-                        download('/system/operlog/export')
+                        download('/system/operlog/export');
                       } catch (error) {}
                     }}
                   >
@@ -378,7 +325,7 @@ const SysOperLog: React.FC = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -389,8 +336,8 @@ const SysOperLog: React.FC = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
-                        setSelectKeys([])
+                        searchQueryFn();
+                        setSelectKeys([]);
                       }}
                     />
                   </Tooltip>
@@ -399,38 +346,22 @@ const SysOperLog: React.FC = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="operId"
-              size="middle"
-              loading={loading}
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="operId" size="middle" loading={loading} rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           <Modal
             title={'操作日志详情'}
             open={isModalOpen}
             onCancel={() => {
-              setIsModalOpen(false)
+              setIsModalOpen(false);
             }}
             width={700}
             footer={[
               <Button
                 key="back"
                 onClick={() => {
-                  setIsModalOpen(false)
+                  setIsModalOpen(false);
                 }}
               >
                 关闭
@@ -486,7 +417,7 @@ const SysOperLog: React.FC = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default SysOperLog
+export default SysOperLog;

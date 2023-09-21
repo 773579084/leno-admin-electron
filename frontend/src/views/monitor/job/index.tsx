@@ -1,21 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import {
-  Button,
-  Form,
-  Input,
-  Select,
-  Col,
-  Row,
-  Tooltip,
-  Table,
-  Pagination,
-  Modal,
-  Radio,
-  message,
-  Switch,
-  Dropdown,
-  MenuProps,
-} from 'antd'
+import React, { useState, useEffect, useRef } from 'react';
+import { Button, Form, Input, Select, Col, Row, Tooltip, Table, Pagination, Modal, Radio, message, Switch, Dropdown, MenuProps } from 'antd';
 import {
   SyncOutlined,
   SearchOutlined,
@@ -29,29 +13,22 @@ import {
   CaretRightOutlined,
   EyeOutlined,
   FieldTimeOutlined,
-} from '@ant-design/icons'
-import type { ColumnsType } from 'antd/es/table'
-import {
-  getListAPI,
-  delAPI,
-  getDetailAPI,
-  addAPI,
-  putAPI,
-  putStatusAPI,
-  runOneAPI,
-} from '@/api/modules/monitor/job'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { download } from '@/api'
-import { IcronComeType, IjobDetailType, IjobType } from '@/type/modules/monitor/job'
-import ColorBtn from '@/components/ColorBtn'
-import { hasPermi } from '@/utils/auth'
-import { IdictType } from '@/type/modules/system/sysDictData'
-import DictTag from '@/components/DictTag'
-import { useNavigate } from 'react-router-dom'
-import classes from './index.module.scss'
-import Cron from '@/components/Cron'
-import { MenuInfo } from 'rc-menu/lib/interface'
-import { pageDelJump } from '@/utils'
+} from '@ant-design/icons';
+import type { ColumnsType } from 'antd/es/table';
+import { getListAPI, delAPI, getDetailAPI, addAPI, putAPI, putStatusAPI, runOneAPI } from '@/api/modules/monitor/job';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { download } from '@/api';
+import { IcronComeType, IjobDetailType, IjobType } from '@/type/modules/monitor/job';
+import ColorBtn from '@/components/ColorBtn';
+import { hasPermi } from '@/utils/auth';
+import { IdictType } from '@/type/modules/system/sysDictData';
+import DictTag from '@/components/DictTag';
+import { useNavigate } from 'react-router-dom';
+import Cron from '@/components/Cron';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { MenuInfo } from 'rc-menu/lib/interface';
+import { pageDelJump } from '@/utils';
+import classes from './index.module.scss';
 
 // 执行策略
 const misfirePolicyDict = [
@@ -67,7 +44,7 @@ const misfirePolicyDict = [
     label: '放弃执行',
     value: '3',
   },
-]
+];
 // 是否并发
 const concurrentDict = [
   {
@@ -78,148 +55,178 @@ const concurrentDict = [
     label: '禁止',
     value: '1',
   },
-]
+];
+
+const items: MenuProps['items'] = [
+  {
+    key: '1',
+    label: (
+      <div>
+        <CaretRightOutlined style={{ marginRight: 10 }} />
+        执行一次
+      </div>
+    ),
+  },
+  {
+    key: '2',
+    label: (
+      <div>
+        <EyeOutlined style={{ marginRight: 10 }} />
+        任务详细
+      </div>
+    ),
+  },
+  {
+    key: '3',
+    label: (
+      <div>
+        <BarsOutlined style={{ marginRight: 10 }} />
+        调度日志
+      </div>
+    ),
+  },
+];
 
 const MonitorJob = () => {
-  const [queryForm] = Form.useForm()
-  const [addEditForm] = Form.useForm()
-  const { confirm } = Modal
-  const navigate = useNavigate()
-  const cronRef = useRef()
+  const [queryForm] = Form.useForm();
+  const [addEditForm] = Form.useForm();
+  const { confirm } = Modal;
+  const navigate = useNavigate();
+  const cronRef = useRef();
 
   // 分页
-  const [queryParams, setQueryParams] = useState<IjobType>({ pageNum: 1, pageSize: 10 })
+  const [queryParams, setQueryParams] = useState<IjobType>({ pageNum: 1, pageSize: 10 });
   // 列表数据
 
-  const [dataList, setDataList] = useState({ count: 0, rows: [] as IjobDetailType[] })
+  const [dataList, setDataList] = useState({ count: 0, rows: [] as IjobDetailType[] });
   // table loading
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   // 新增编辑 model显隐
-  const [isTaskOpen, setIsTaskOpen] = useState(false)
+  const [isTaskOpen, setIsTaskOpen] = useState(false);
   // 任务详情 model显隐
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // 新增编辑判断
-  const [isAdd, setIsAdd] = useState(true)
+  const [isAdd, setIsAdd] = useState(true);
   // 非单个禁用
-  const [single, setSingle] = useState(true)
+  const [single, setSingle] = useState(true);
   // 非多个禁用
-  const [multiple, setMultiple] = useState(true)
+  const [multiple, setMultiple] = useState(true);
   // 保存table 选择的key
-  const [selectKeys, setSelectKeys] = useState<React.Key[]>([])
+  const [selectKeys, setSelectKeys] = useState<React.Key[]>([]);
   //  table 后台使用的key
-  const [rowKeys, setRowKeys] = useState('')
+  const [rowKeys, setRowKeys] = useState('');
   // 控制搜索隐藏显示
-  const [searchShow, setSearchShow] = useState(true)
+  const [searchShow, setSearchShow] = useState(true);
   // 当前编辑的id
-  const [currentId, setCurrentId] = useState<number>()
+  const [currentId, setCurrentId] = useState<number>();
   // 存储当前的详细信息
-  const [currentDetail, setCurrentDetail] = useState<IjobDetailType>({})
+  const [currentDetail, setCurrentDetail] = useState<IjobDetailType>({});
   // Cron model显隐
-  const [isCronOpen, setIsCronOpen] = useState(false)
+  const [isCronOpen, setIsCronOpen] = useState(false);
 
-  const [dictJobGroup, setDictJobGroup] = useState<IdictType[]>([])
-  const [dictStatus, setDictStatus] = useState<IdictType[]>([])
+  const [dictJobGroup, setDictJobGroup] = useState<IdictType[]>([]);
+  const [dictStatus, setDictStatus] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDictsFn = async () => {
       try {
-        const sys_job_group = await getDictsApi('sys_job_group')
-        setDictJobGroup(sys_job_group.data.result)
-        const sys_job_status = await getDictsApi('sys_job_status')
-        setDictStatus(sys_job_status.data.result)
+        const sys_job_group = await getDictsApi('sys_job_group');
+        setDictJobGroup(sys_job_group.data.result);
+        const sys_job_status = await getDictsApi('sys_job_status');
+        setDictStatus(sys_job_status.data.result);
       } catch (error) {}
-    }
-    getDictsFn()
-  }, [])
-
-  useEffect(() => {
-    getList()
-  }, [queryParams])
+    };
+    getDictsFn();
+  }, []);
 
   // 查询列表
   const getList = async () => {
     try {
-      const { data } = await getListAPI(queryParams)
+      const { data } = await getListAPI(queryParams);
 
-      setDataList({ ...data.result })
-      setLoading(false)
+      setDataList({ ...data.result });
+      setLoading(false);
     } catch (error) {}
-  }
+  };
+
+  useEffect(() => {
+    getList();
+  }, [queryParams]);
 
   // 搜索
   const searchQueryFn = () => {
-    let form = queryForm.getFieldsValue()
+    const form = queryForm.getFieldsValue();
     setQueryParams({
       pageNum: 1,
       pageSize: 10,
       ...form,
-    })
-  }
+    });
+  };
 
   // 重置
   const resetQueryFn = () => {
-    queryForm.resetFields()
-    setSelectKeys([])
-    setQueryParams({ pageNum: 1, pageSize: 10 })
-  }
+    queryForm.resetFields();
+    setSelectKeys([]);
+    setQueryParams({ pageNum: 1, pageSize: 10 });
+  };
 
   // row-select
   const rowSelection = {
     selectedRowKeys: selectKeys,
     onChange: (selectedRowKeys: React.Key[], selectedRows: IjobDetailType[]) => {
       if (!selectedRowKeys.length || selectedRowKeys.length > 1) {
-        setSingle(true)
+        setSingle(true);
       } else {
-        setSingle(false)
+        setSingle(false);
       }
-      selectedRowKeys.length ? setMultiple(false) : setMultiple(true)
-      setSelectKeys(selectedRowKeys)
-      setRowKeys(selectedRowKeys.join(','))
+      selectedRowKeys.length ? setMultiple(false) : setMultiple(true);
+      setSelectKeys(selectedRowKeys);
+      setRowKeys(selectedRowKeys.join(','));
     },
-  }
+  };
 
   // 获取详情
   const handleEditForm = async (id: number) => {
     try {
-      const { data } = await getDetailAPI(id)
-      setCurrentId(id)
-      setCurrentDetail(data.result)
-      setIsModalOpen(true)
-      setIsAdd(false)
-      addEditForm.setFieldsValue(data.result as unknown as IjobType)
+      const { data } = await getDetailAPI(id);
+      setCurrentId(id);
+      setCurrentDetail(data.result);
+      setIsModalOpen(true);
+      setIsAdd(false);
+      addEditForm.setFieldsValue(data.result as unknown as IjobType);
     } catch (error) {}
-  }
+  };
 
   // 表单提交
   const handleFormFinish = async (values: IjobDetailType) => {
     try {
       if (isAdd) {
-        const { data } = await addAPI(values)
-        message.success(data.message)
+        const { data } = await addAPI(values);
+        message.success(data.message);
       } else {
-        const { data } = await putAPI({ ...values, jobId: currentId })
-        message.success(data.message)
+        const { data } = await putAPI({ ...values, jobId: currentId });
+        message.success(data.message);
       }
     } catch (error) {}
-    setIsModalOpen(false)
-    addEditForm.resetFields()
-    getList()
-  }
+    setIsModalOpen(false);
+    addEditForm.resetFields();
+    getList();
+  };
 
   // cron 确认/重置
   const confirmResetCron = (type = 'add') => {
-    const { refGetCron, resetCronState } = cronRef.current as unknown as IcronComeType
+    const { refGetCron, resetCronState } = cronRef.current as unknown as IcronComeType;
     if (type === 'add') {
-      addEditForm.setFieldValue('cronExpression', refGetCron())
+      addEditForm.setFieldValue('cronExpression', refGetCron());
     } else {
-      resetCronState()
+      resetCronState();
     }
-  }
+  };
 
   // 分页
   const onPagChange = async (pageNum: number, pageSize: number) => {
-    setQueryParams({ pageNum, pageSize })
-  }
+    setQueryParams({ pageNum, pageSize });
+  };
 
   // 删除
   const delFn = (ids: string) => {
@@ -227,48 +234,48 @@ const MonitorJob = () => {
       icon: <ExclamationCircleOutlined />,
       content: `是否确认删除编号为"${ids}"的数据项？`,
       centered: true,
-      async onOk() {
+      onOk: async () => {
         try {
-          const { data } = await delAPI(ids)
-          message.success(data.message)
-          pageDelJump(dataList.count, ids, queryParams, setQueryParams)
+          const { data } = await delAPI(ids);
+          message.success(data.message);
+          pageDelJump(dataList.count, ids, queryParams, setQueryParams);
         } catch (error) {}
       },
-    })
-  }
+    });
+  };
 
   // 跳转 调度日志
   const jumpJobLog = (id = 0) => {
-    console.log(245, id)
-    navigate(`/monitor/jobLog/${id}`)
-  }
+    console.log(245, id);
+    navigate(`/monitor/jobLog/${id}`);
+  };
 
   const handleMenuClick = async (e: MenuInfo, record: IjobType) => {
     switch (e.key) {
       case '1':
         try {
-          const { data } = await runOneAPI({ jobId: record.jobId })
-          message.success(data.message)
+          const { data } = await runOneAPI({ jobId: record.jobId });
+          message.success(data.message);
         } catch (error) {}
-        break
+        break;
       case '2':
         try {
-          const { data } = await getDetailAPI(record.jobId as number)
-          setCurrentDetail(data.result)
-          setIsTaskOpen(true)
+          const { data } = await getDetailAPI(record.jobId as number);
+          setCurrentDetail(data.result);
+          setIsTaskOpen(true);
         } catch (error) {}
-        break
+        break;
       case '3':
-        jumpJobLog(record.jobId)
-        break
+        jumpJobLog(record.jobId);
+        break;
 
       default:
-        break
+        break;
     }
-  }
+  };
 
   // table
-  let columns = [
+  const columns = [
     {
       title: '编码',
       dataIndex: 'index',
@@ -315,8 +322,8 @@ const MonitorJob = () => {
                 await putStatusAPI({
                   jobId: record.jobId,
                   status: record.status === '0' ? '1' : '0',
-                })
-                getList()
+                });
+                getList();
               } catch (error) {}
             }}
           />
@@ -330,29 +337,17 @@ const MonitorJob = () => {
       fixed: 'right',
       render: (_: any, record: IjobType) => (
         <div>
-          <Button
-            hidden={hasPermi('monitor:job:edit')}
-            onClick={() => handleEditForm(record.jobId as number)}
-            size="small"
-            icon={<EditOutlined />}
-            type="link"
-          >
+          <Button hidden={hasPermi('monitor:job:edit')} onClick={() => handleEditForm(record.jobId as number)} size="small" icon={<EditOutlined />} type="link">
             修改
           </Button>
-          <Button
-            hidden={hasPermi('monitor:job:remove')}
-            size="small"
-            icon={<DeleteOutlined />}
-            type="link"
-            onClick={() => delFn(String(record.jobId))}
-          >
+          <Button hidden={hasPermi('monitor:job:remove')} size="small" icon={<DeleteOutlined />} type="link" onClick={() => delFn(String(record.jobId))}>
             删除
           </Button>
           <Dropdown
             menu={{
               items,
               onClick: (e) => {
-                handleMenuClick(e, record)
+                handleMenuClick(e, record);
               },
             }}
             placement="bottomRight"
@@ -364,40 +359,10 @@ const MonitorJob = () => {
         </div>
       ),
     },
-  ] as ColumnsType<IjobDetailType>
+  ] as ColumnsType<IjobDetailType>;
 
   // table 数据源
-  const tableData = dataList.rows
-
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: (
-        <div>
-          <CaretRightOutlined style={{ marginRight: 10 }} />
-          执行一次
-        </div>
-      ),
-    },
-    {
-      key: '2',
-      label: (
-        <div>
-          <EyeOutlined style={{ marginRight: 10 }} />
-          任务详细
-        </div>
-      ),
-    },
-    {
-      key: '3',
-      label: (
-        <div>
-          <BarsOutlined style={{ marginRight: 10 }} />
-          调度日志
-        </div>
-      ),
-    },
-  ]
+  const tableData = dataList.rows;
 
   return (
     <div className="app-container">
@@ -405,12 +370,7 @@ const MonitorJob = () => {
         <Col span={24}>
           <Form form={queryForm} hidden={!searchShow} layout="inline" className="leno-search">
             <Form.Item label="任务名称" name="jobName">
-              <Input
-                style={{ width: 240 }}
-                placeholder="请输入任务名称"
-                allowClear
-                onPressEnter={searchQueryFn}
-              />
+              <Input style={{ width: 240 }} placeholder="请输入任务名称" allowClear onPressEnter={searchQueryFn} />
             </Form.Item>
             <Form.Item name="jobGroup" label="任务组名">
               <Select
@@ -454,43 +414,26 @@ const MonitorJob = () => {
                     hidden={hasPermi('monitor:job:add')}
                     icon={<PlusOutlined />}
                     onClick={() => {
-                      setCurrentDetail({})
-                      setIsModalOpen(true)
-                      setIsAdd(true)
+                      setCurrentDetail({});
+                      setIsModalOpen(true);
+                      setIsAdd(true);
                     }}
                   >
                     新增
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('monitor:job:edit')}
-                    disabled={single}
-                    color="success"
-                    icon={<EditOutlined />}
-                    onClick={() => handleEditForm(Number(rowKeys))}
-                  >
+                  <ColorBtn hidden={hasPermi('monitor:job:edit')} disabled={single} color="success" icon={<EditOutlined />} onClick={() => handleEditForm(Number(rowKeys))}>
                     修改
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('monitor:job:remove')}
-                    onClick={() => delFn(rowKeys)}
-                    disabled={multiple}
-                    color="danger"
-                    icon={<DeleteOutlined />}
-                  >
+                  <ColorBtn hidden={hasPermi('monitor:job:remove')} onClick={() => delFn(rowKeys)} disabled={multiple} color="danger" icon={<DeleteOutlined />}>
                     删除
                   </ColorBtn>
                 </Col>
                 <Col>
-                  <ColorBtn
-                    hidden={hasPermi('monitor:job:export')}
-                    color="warning"
-                    icon={<VerticalAlignBottomOutlined />}
-                    onClick={() => download('/monitor/job/export')}
-                  >
+                  <ColorBtn hidden={hasPermi('monitor:job:export')} color="warning" icon={<VerticalAlignBottomOutlined />} onClick={() => download('/monitor/job/export')}>
                     导出
                   </ColorBtn>
                 </Col>
@@ -509,7 +452,7 @@ const MonitorJob = () => {
                       shape="circle"
                       icon={<SearchOutlined />}
                       onClick={() => {
-                        setSearchShow(!searchShow)
+                        setSearchShow(!searchShow);
                       }}
                     />
                   </Tooltip>
@@ -520,8 +463,8 @@ const MonitorJob = () => {
                       shape="circle"
                       icon={<SyncOutlined />}
                       onClick={() => {
-                        searchQueryFn()
-                        setSelectKeys([])
+                        searchQueryFn();
+                        setSelectKeys([]);
                       }}
                     />
                   </Tooltip>
@@ -530,24 +473,8 @@ const MonitorJob = () => {
             </Col>
           </Row>
           <div className="leno-table">
-            <Table
-              columns={columns}
-              dataSource={tableData}
-              pagination={false}
-              rowKey="jobId"
-              size="middle"
-              loading={loading}
-              rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }}
-            />
-            <Pagination
-              className="pagination"
-              onChange={onPagChange}
-              total={dataList.count}
-              showSizeChanger
-              showQuickJumper
-              current={queryParams.pageNum}
-              showTotal={(total) => `共 ${total} 条`}
-            />
+            <Table columns={columns} dataSource={tableData} pagination={false} rowKey="jobId" size="middle" loading={loading} rowSelection={{ type: 'checkbox', fixed: 'left', ...rowSelection }} />
+            <Pagination className="pagination" onChange={onPagChange} total={dataList.count} showSizeChanger showQuickJumper current={queryParams.pageNum} showTotal={(total) => `共 ${total} 条`} />
           </div>
 
           {/* 添加 编辑  */}
@@ -556,8 +483,8 @@ const MonitorJob = () => {
             open={isModalOpen}
             onOk={() => addEditForm.submit()}
             onCancel={() => {
-              setIsModalOpen(false)
-              addEditForm.resetFields()
+              setIsModalOpen(false);
+              addEditForm.resetFields();
             }}
             width={800}
             className={classes['job-mes']}
@@ -574,12 +501,7 @@ const MonitorJob = () => {
             >
               <Row gutter={24}>
                 <Col span={12}>
-                  <Form.Item
-                    labelCol={{ span: 8 }}
-                    label="任务名称"
-                    name="jobName"
-                    rules={[{ required: true, message: '请输入任务名称!' }]}
-                  >
+                  <Form.Item labelCol={{ span: 8 }} label="任务名称" name="jobName" rules={[{ required: true, message: '请输入任务名称!' }]}>
                     <Input placeholder="请输入任务名称" />
                   </Form.Item>
                 </Col>
@@ -607,20 +529,11 @@ const MonitorJob = () => {
               >
                 <Input placeholder="请输入调用方法" />
               </Form.Item>
-              <Form.Item
-                label="cron表达式"
-                labelCol={{ span: 4 }}
-                name="cronExpression"
-                rules={[{ required: true, message: '请输入cron表达式!' }]}
-              >
+              <Form.Item label="cron表达式" labelCol={{ span: 4 }} name="cronExpression" rules={[{ required: true, message: '请输入cron表达式!' }]}>
                 <Input
                   placeholder="请输入cron表达式"
                   addonAfter={
-                    <Button
-                      icon={<FieldTimeOutlined />}
-                      type="ghost"
-                      onClick={() => setIsCronOpen(true)}
-                    >
+                    <Button icon={<FieldTimeOutlined />} type="ghost" onClick={() => setIsCronOpen(true)}>
                       生成表达式
                     </Button>
                   }
@@ -661,14 +574,14 @@ const MonitorJob = () => {
             title={'任务详情'}
             open={isTaskOpen}
             onCancel={() => {
-              setIsTaskOpen(false)
+              setIsTaskOpen(false);
             }}
             width={700}
             footer={[
               <Button
                 key="back"
                 onClick={() => {
-                  setIsTaskOpen(false)
+                  setIsTaskOpen(false);
                 }}
               >
                 关闭
@@ -681,12 +594,7 @@ const MonitorJob = () => {
                   <Form.Item label="任务编号">{currentDetail?.jobId}</Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="任务分组">
-                    {
-                      dictJobGroup.find((item) => item.dictValue === currentDetail?.jobGroup)
-                        ?.dictLabel
-                    }
-                  </Form.Item>
+                  <Form.Item label="任务分组">{dictJobGroup.find((item) => item.dictValue === currentDetail?.jobGroup)?.dictLabel}</Form.Item>
                 </Col>
               </Row>
               <Row gutter={24}>
@@ -710,21 +618,14 @@ const MonitorJob = () => {
               </Form.Item>
               <Row gutter={24}>
                 <Col span={12}>
-                  <Form.Item label="任务状态">
-                    {dictStatus.find((item) => item.dictValue === currentDetail?.status)?.dictLabel}
-                  </Form.Item>
+                  <Form.Item label="任务状态">{dictStatus.find((item) => item.dictValue === currentDetail?.status)?.dictLabel}</Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item label="是否并发">
-                    {concurrentDict.find((item) => item.value === currentDetail?.concurrent)?.label}
-                  </Form.Item>
+                  <Form.Item label="是否并发">{concurrentDict.find((item) => item.value === currentDetail?.concurrent)?.label}</Form.Item>
                 </Col>
               </Row>
               <Form.Item labelCol={{ span: 4 }} label="执行策略">
-                {
-                  misfirePolicyDict.find((item) => item.value === currentDetail?.misfirePolicy)
-                    ?.label
-                }
+                {misfirePolicyDict.find((item) => item.value === currentDetail?.misfirePolicy)?.label}
               </Form.Item>
             </Form>
           </Modal>
@@ -734,14 +635,14 @@ const MonitorJob = () => {
             title={'Cron表达式生成器'}
             open={isCronOpen}
             onCancel={() => {
-              setIsCronOpen(false)
+              setIsCronOpen(false);
             }}
             footer={[
               <Button
                 key={1}
                 onClick={() => {
-                  confirmResetCron()
-                  setIsCronOpen(false)
+                  confirmResetCron();
+                  setIsCronOpen(false);
                 }}
                 type="primary"
               >
@@ -753,9 +654,9 @@ const MonitorJob = () => {
               <Button
                 key={3}
                 onClick={() => {
-                  const { resetCronState } = cronRef.current as unknown as IcronComeType
-                  setIsCronOpen(false)
-                  resetCronState()
+                  const { resetCronState } = cronRef.current as unknown as IcronComeType;
+                  setIsCronOpen(false);
+                  resetCronState();
                 }}
               >
                 取消
@@ -768,7 +669,7 @@ const MonitorJob = () => {
         </Col>
       </Row>
     </div>
-  )
-}
+  );
+};
 
-export default MonitorJob
+export default MonitorJob;

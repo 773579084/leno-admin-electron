@@ -1,57 +1,55 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Form, Input, message, Radio, Space } from 'antd'
-import { updateUserInfoAPI, getUserAPI } from '@/api/modules/user'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { IUserProp } from '@/type'
-import useStore from '@/store'
-import { observer } from 'mobx-react-lite'
-import { HOME_URL } from '@/config/config'
-import { getDictsApi } from '@/api/modules/system/dictData'
-import { IdictType } from '@/type/modules/system/sysDictData'
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, message, Radio, Space } from 'antd';
+import { updateUserInfoAPI, getUserAPI } from '@/api/modules/user';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { IUserProp } from '@/type';
+import useStore from '@/store';
+import { observer } from 'mobx-react-lite';
+import { HOME_URL } from '@/config/config';
+import { getDictsApi } from '@/api/modules/system/dictData';
+import { IdictType } from '@/type/modules/system/sysDictData';
 
 const layout = {
   labelCol: { span: 3 },
   wrapperCol: { span: 21 },
-}
-const tailLayout = {
-  wrapperCol: { offset: 3, span: 21 },
-}
+};
+const tailLayout = { wrapperCol: { offset: 3, span: 21 } };
 
 const Basics = () => {
-  const [form] = Form.useForm()
-  const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   const {
     useUserStore: { userInfo, setUserInfo },
     useLayoutStore: { defaultObjMobx, changeTabsListMobx },
-  } = useStore()
-  const [dictSex, setDictSex] = useState<IdictType[]>([])
+  } = useStore();
+  const [dictSex, setDictSex] = useState<IdictType[]>([]);
 
   useEffect(() => {
     const getDicts = async () => {
       try {
-        const res = await getDictsApi('sys_user_sex')
-        setDictSex(res.data.result)
+        const res = await getDictsApi('sys_user_sex');
+        setDictSex(res.data.result);
       } catch (error) {}
-    }
-    getDicts()
-  }, [])
+    };
+    getDicts();
+  }, []);
 
   const onFinish = async (values: IUserProp) => {
     try {
-      const res = await updateUserInfoAPI(values)
-      message.success(res.data.message)
+      const res = await updateUserInfoAPI(values);
+      message.success(res.data.message);
       // 更新 userInfo 的信息
-      const userRes = await getUserAPI()
-      setUserInfo(userRes.data.result)
+      const userRes = await getUserAPI();
+      setUserInfo(userRes.data.result);
     } catch (error) {}
-  }
+  };
 
   const onClose = () => {
-    const newTabs = defaultObjMobx.tabsListMobx.filter((item) => item.path !== pathname)
-    changeTabsListMobx(newTabs)
-    navigate(HOME_URL)
-  }
+    const newTabs = defaultObjMobx.tabsListMobx.filter((item) => item.path !== pathname);
+    changeTabsListMobx(newTabs);
+    navigate(HOME_URL);
+  };
 
   return (
     <Form
@@ -80,11 +78,7 @@ const Basics = () => {
       >
         <Input placeholder="请输入1~10字昵称" />
       </Form.Item>
-      <Form.Item
-        name="phonenumber"
-        label="手机号码"
-        rules={[{ required: true, pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号码！' }]}
-      >
+      <Form.Item name="phonenumber" label="手机号码" rules={[{ required: true, pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号码！' }]}>
         <Input placeholder="请输入手机号码" />
       </Form.Item>
       <Form.Item
@@ -120,6 +114,6 @@ const Basics = () => {
         </Space>
       </Form.Item>
     </Form>
-  )
-}
-export default observer(Basics)
+  );
+};
+export default observer(Basics);

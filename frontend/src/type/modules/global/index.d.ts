@@ -1,11 +1,11 @@
 /* App */
 export type IIsActive = {
-  isActive: boolean
-}
+  isActive: boolean;
+};
 
 /* Loading */
 export interface ILoadingGloBalPropsType {
-  delay?: number
-  className?: string
-  tip?: string
+  delay?: number;
+  className?: string;
+  tip?: string;
 }
